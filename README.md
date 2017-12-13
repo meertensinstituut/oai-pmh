@@ -16,5 +16,5 @@ docker build -t oai-pmh https://raw.githubusercontent.com/meertensinstituut/oai-
 docker run -t -i -p 8080:80 --name oai-pmh oai-pmh
 ```
 
-This will provide a website on port 8080 on the ip of your docker host with a running OAI-PMH DataProvider on an also included MySQL database.
+This will provide a website on port 8080 on the ip of your docker host with a running OAI-PMH DataProvider on an also included MySQL demo database `oai-pmh` with username `demo` and password `demo`.
 
