@@ -1,0 +1,9 @@
+.buildpath
+.project
+.settings/
+.svn
+.settings
+.DS_Store
+**/.DS_Store
+**/cache/*
+**/config/*
