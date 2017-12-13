@@ -37,15 +37,9 @@ class Server {
     // baseUrl
     $port = $_SERVER ["SERVER_PORT"];
     if (isset ( $_SERVER ["HTTPS"] )) {
-      $this->baseUrl = "https://" . $_SERVER ["HTTP_HOST"];
-      if ($port != 443) {
-        $this->baseUrl .= ":" . $port;
-      }
+      $this->baseUrl = "https://" . $_SERVER ["HTTP_HOST"];      
     } else {
-      $this->baseUrl = "http://" . $_SERVER ["HTTP_HOST"];
-      if ($port != 80) {
-        $this->baseUrl .= ":" . $port;
-      }
+      $this->baseUrl = "http://" . $_SERVER ["HTTP_HOST"];      
     }
     $this->baseUrl .= preg_replace ( "/\?(.*?)$/", "", $_SERVER ["REQUEST_URI"] );
     // request
