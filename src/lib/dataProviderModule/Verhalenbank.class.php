@@ -84,9 +84,9 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
   protected function getIdentifiersListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until) {
     list ( $binds, $conditions ) = $this->createItemsConditions ( $set, $from, $until );
     $sql = "SELECT
-                `omeka_items`.`id` AS `" . Verhalenbank::PREFIX_HEADER . "identifier`,
-                UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . Verhalenbank::PREFIX_HEADER . "datestamp`,
-                `omeka_items`.`collection_id` AS `" . Verhalenbank::PREFIX_HEADER . "setSpec`
+                `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
+                UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
+                `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`
               FROM `omeka_items`
               LEFT JOIN `omeka_collections`
               ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -106,24 +106,24 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
     list ( $binds, $conditions ) = $this->createItemsConditions ( $set, $from, $until );
     if($metadataPrefix==MetadataFormatDC::METADATAPREFIX) {
       $sql = "SELECT
-                  `omeka_items`.`id` AS `" . Verhalenbank::PREFIX_HEADER . "identifier`,
-                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . Verhalenbank::PREFIX_HEADER . "datestamp`,
-                  `omeka_items`.`collection_id` AS `" . Verhalenbank::PREFIX_HEADER . "setSpec`,
-                  GROUP_CONCAT(DISTINCT(`dc_contributor`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "contributor`,
-                  GROUP_CONCAT(DISTINCT(`dc_coverage`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "coverage`,
-                  GROUP_CONCAT(DISTINCT(`dc_creator`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "creator`,
-                  GROUP_CONCAT(DISTINCT(`dc_date`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "date`,
-                  GROUP_CONCAT(DISTINCT(`dc_description`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "description`,
-                  GROUP_CONCAT(DISTINCT(`dc_format`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "format`,
-                  GROUP_CONCAT(DISTINCT(`dc_identifier`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "identifier`,
-                  GROUP_CONCAT(DISTINCT(`dc_language`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "language`,
-                  GROUP_CONCAT(DISTINCT(`dc_publisher`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "publisher`,
-                  GROUP_CONCAT(DISTINCT(`dc_relation`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "relation`,
-                  GROUP_CONCAT(DISTINCT(`dc_rights`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "rights`,
-                  GROUP_CONCAT(DISTINCT(`dc_source`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "source`,
-                  GROUP_CONCAT(DISTINCT(`dc_subject`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "subject`,
-                  GROUP_CONCAT(DISTINCT(`dc_title`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "title`,
-                  GROUP_CONCAT(DISTINCT(`dc_type`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "type`
+                  `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
+                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
+                  `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
+                  GROUP_CONCAT(DISTINCT(`dc_contributor`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "contributor`,
+                  GROUP_CONCAT(DISTINCT(`dc_coverage`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "coverage`,
+                  GROUP_CONCAT(DISTINCT(`dc_creator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "creator`,
+                  GROUP_CONCAT(DISTINCT(`dc_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "date`,
+                  GROUP_CONCAT(DISTINCT(`dc_description`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "description`,
+                  GROUP_CONCAT(DISTINCT(`dc_format`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "format`,
+                  GROUP_CONCAT(DISTINCT(`dc_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "identifier`,
+                  GROUP_CONCAT(DISTINCT(`dc_language`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "language`,
+                  GROUP_CONCAT(DISTINCT(`dc_publisher`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "publisher`,
+                  GROUP_CONCAT(DISTINCT(`dc_relation`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "relation`,
+                  GROUP_CONCAT(DISTINCT(`dc_rights`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "rights`,
+                  GROUP_CONCAT(DISTINCT(`dc_source`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "source`,
+                  GROUP_CONCAT(DISTINCT(`dc_subject`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "subject`,
+                  GROUP_CONCAT(DISTINCT(`dc_title`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "title`,
+                  GROUP_CONCAT(DISTINCT(`dc_type`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "type`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -164,16 +164,16 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ";
     } else if($metadataPrefix==MetadataFormatIsebel::METADATAPREFIX) {
       $sql = "SELECT
-                  `omeka_items`.`id` AS `" . Verhalenbank::PREFIX_HEADER . "identifier`,
-                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . Verhalenbank::PREFIX_HEADER . "datestamp`,
-                  `omeka_items`.`collection_id` AS `" . Verhalenbank::PREFIX_HEADER . "setSpec`,
-                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . Verhalenbank::PREFIX_METADATA . "url`,
-                  GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "identifier`,
-                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "text`,
-                  GROUP_CONCAT(DISTINCT(`isebel_location`.`locality`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "location`,
-                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "narrator`,
-                  GROUP_CONCAT(DISTINCT(`isebel_timeOfNarration`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "timeOfNarration`,
-                  GROUP_CONCAT(DISTINCT(`isebel_keyWord`.`name`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "keyWord`
+                  `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
+                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
+                  `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
+                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
+                  GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "identifier`,
+                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "text`,
+                  GROUP_CONCAT(DISTINCT(`isebel_location`.`locality`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "location`,
+                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "narrator`,
+                  GROUP_CONCAT(DISTINCT(`isebel_timeOfNarration`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "timeOfNarration`,
+                  GROUP_CONCAT(DISTINCT(`isebel_keyWord`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "keyWord`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -213,24 +213,24 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
     );
     if($metadataPrefix==MetadataFormatDC::METADATAPREFIX) {
       $sql = "SELECT
-                  `omeka_items`.`id` AS `" . Verhalenbank::PREFIX_HEADER . "identifier`,
-                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . Verhalenbank::PREFIX_HEADER . "datestamp`,
-                  `omeka_items`.`collection_id` AS `" . Verhalenbank::PREFIX_HEADER . "setSpec`,
-                  GROUP_CONCAT(DISTINCT(`dc_contributor`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "contributor`,
-                  GROUP_CONCAT(DISTINCT(`dc_coverage`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "coverage`,
-                  GROUP_CONCAT(DISTINCT(`dc_creator`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "creator`,
-                  GROUP_CONCAT(DISTINCT(`dc_date`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "date`,
-                  GROUP_CONCAT(DISTINCT(`dc_description`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "description`,
-                  GROUP_CONCAT(DISTINCT(`dc_format`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "format`,
-                  GROUP_CONCAT(DISTINCT(`dc_identifier`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "identifier`,
-                  GROUP_CONCAT(DISTINCT(`dc_language`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "language`,
-                  GROUP_CONCAT(DISTINCT(`dc_publisher`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "publisher`,
-                  GROUP_CONCAT(DISTINCT(`dc_relation`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "relation`,
-                  GROUP_CONCAT(DISTINCT(`dc_rights`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "rights`,
-                  GROUP_CONCAT(DISTINCT(`dc_source`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "source`,
-                  GROUP_CONCAT(DISTINCT(`dc_subject`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "subject`,
-                  GROUP_CONCAT(DISTINCT(`dc_title`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "title`,
-                  GROUP_CONCAT(DISTINCT(`dc_type`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "type`
+                  `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
+                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
+                  `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
+                  GROUP_CONCAT(DISTINCT(`dc_contributor`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "contributor`,
+                  GROUP_CONCAT(DISTINCT(`dc_coverage`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "coverage`,
+                  GROUP_CONCAT(DISTINCT(`dc_creator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "creator`,
+                  GROUP_CONCAT(DISTINCT(`dc_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "date`,
+                  GROUP_CONCAT(DISTINCT(`dc_description`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "description`,
+                  GROUP_CONCAT(DISTINCT(`dc_format`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "format`,
+                  GROUP_CONCAT(DISTINCT(`dc_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "identifier`,
+                  GROUP_CONCAT(DISTINCT(`dc_language`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "language`,
+                  GROUP_CONCAT(DISTINCT(`dc_publisher`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "publisher`,
+                  GROUP_CONCAT(DISTINCT(`dc_relation`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "relation`,
+                  GROUP_CONCAT(DISTINCT(`dc_rights`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "rights`,
+                  GROUP_CONCAT(DISTINCT(`dc_source`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "source`,
+                  GROUP_CONCAT(DISTINCT(`dc_subject`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "subject`,
+                  GROUP_CONCAT(DISTINCT(`dc_title`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "title`,
+                  GROUP_CONCAT(DISTINCT(`dc_type`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "type`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -271,16 +271,16 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ";
     } else if($metadataPrefix==MetadataFormatIsebel::METADATAPREFIX) {
       $sql = "SELECT
-                  `omeka_items`.`id` AS `" . Verhalenbank::PREFIX_HEADER . "identifier`,
-                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . Verhalenbank::PREFIX_HEADER . "datestamp`,
-                  `omeka_items`.`collection_id` AS `" . Verhalenbank::PREFIX_HEADER . "setSpec`,
-                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . Verhalenbank::PREFIX_METADATA . "url`,
-                  GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "identifier`,
-                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "text`,
-                  GROUP_CONCAT(DISTINCT(`isebel_location`.`locality`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "location`,
-                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "narrator`,
-                  GROUP_CONCAT(DISTINCT(`isebel_timeOfNarration`.`text`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "timeOfNarration`,
-                  GROUP_CONCAT(DISTINCT(`isebel_keyWord`.`name`) SEPARATOR '" . Verhalenbank::SPLIT_CHARACTER . "') AS `" . Verhalenbank::PREFIX_METADATA . "keyWord`
+                  `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
+                  UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
+                  `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
+                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
+                  GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "identifier`,
+                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "text`,
+                  GROUP_CONCAT(DISTINCT(`isebel_location`.`locality`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "location`,
+                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "narrator`,
+                  GROUP_CONCAT(DISTINCT(`isebel_timeOfNarration`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "timeOfNarration`,
+                  GROUP_CONCAT(DISTINCT(`isebel_keyWord`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER . "') AS `" . self::PREFIX_METADATA . "keyWord`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -338,7 +338,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
   protected function filterHeader($headerData) {
     $filteredData = array ();
     foreach ( $headerData as $key => $value ) {
-      if (preg_match ( "/^".preg_quote(Verhalenbank::PREFIX_HEADER)."(.*?)$/", $key, $match )) {
+      if (preg_match ( "/^".preg_quote(self::PREFIX_HEADER)."(.*?)$/", $key, $match )) {
         $filteredData [$match [1]] = $value;
       }
     }
@@ -347,10 +347,10 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
   protected function filterMetadata($metadataData, $metadataPrefix) {
     $filteredData = array ();
     foreach ( $metadataData as $key => $value ) {
-      if (preg_match ( "/^".preg_quote(Verhalenbank::PREFIX_METADATA)."(.*?)$/", $key, $match )) {
+      if (preg_match ( "/^".preg_quote(self::PREFIX_METADATA)."(.*?)$/", $key, $match )) {
         if ($value != null) {
-          if (strpos ( $value, Verhalenbank::SPLIT_CHARACTER ) !== false) {
-            $filteredData [$match [1]] = explode ( Verhalenbank::SPLIT_CHARACTER, $value );
+          if (strpos ( $value, self::SPLIT_CHARACTER ) !== false) {
+            $filteredData [$match [1]] = explode ( self::SPLIT_CHARACTER, $value );
           } else {
             $filteredData [$match [1]] = $value;
           }
