@@ -11,7 +11,7 @@ RUN mkdir phpmyadmin
 
 ADD https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip /root/phpmyadmin 
 
-RUN apt-get update && apt-get install -y locales software-properties-common unzip apache2 php php-mysqli php-curl php-sqlite3 libapache2-mod-php subversion && \
+RUN apt-get update && apt-get install -y locales software-properties-common unzip apache2 php php-mysqli php-curl php-sqlite3 php-xml libapache2-mod-php subversion && \
     locale-gen en_US.UTF-8 en_US && update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en
             
 RUN apt-get install -y mariadb-server && mysql_install_db && service mysql start && svn export https://github.com/meertensinstituut/oai-pmh/trunk/docker/resources resources && \

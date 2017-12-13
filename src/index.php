@@ -1,4 +1,15 @@
 <?php
+// check for modules
+if (! extension_loaded ( "curl" )) {
+  die ( "Curl module for PHP is required!" );
+} else if (! extension_loaded ( "pdo_sqlite" )) {
+  die ( "Php_sqlite module for PHP is required!" );
+} else if (! extension_loaded ( "PDO" )) {
+  die ( "PDO module for PHP is required!" );
+} else if (! extension_loaded ( "xml" )) {
+  die ( "XML module for PHP is required!" );
+} 
+
 // autoload classes
 const CLASS_EXTENSION = ".class.php";
 function autoLoader($class) {
