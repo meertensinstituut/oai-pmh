@@ -35,7 +35,7 @@ class MetadataFormatDC extends MetadataFormat {
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatDC::METADATAPREFIX, MetadataFormatDC::METADATANAMESPACE ) );
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatDC::PREFIX, "http://purl.org/dc/elements/1.1/" ) );
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" ) );
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatDC::SCHEMA . " " . MetadataFormatDC::METADATANAMESPACE ) );
+      $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatDC::METADATANAMESPACE . "\n " . MetadataFormatDC::SCHEMA ) );
       foreach ( MetadataFormatDC::MAINELEMENTS as $mainElement ) {
         if ($data->variableSet ( $mainElement )) {
           $value = $data->get ( $mainElement );

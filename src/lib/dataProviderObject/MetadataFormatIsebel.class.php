@@ -27,7 +27,7 @@ class MetadataFormatIsebel extends MetadataFormat {
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIX, MetadataFormatIsebel::METADATANAMESPACE ) );
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::PREFIX, "http://purl.org/dc/elements/1.1/" ) );
       $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" ) );
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatIsebel::SCHEMA . " " . MetadataFormatIsebel::METADATANAMESPACE ) );
+      $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatIsebel::METADATANAMESPACE . "\n " . MetadataFormatIsebel::SCHEMA ) );
       foreach ( MetadataFormatIsebel::MAINELEMENTS as $mainElement ) {
         if ($data->variableSet ( $mainElement )) {
           $value = $data->get ( $mainElement );

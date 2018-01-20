@@ -80,6 +80,10 @@ class Server {
   private function init() {
     // create xml
     $this->response_dom = new \DOMDocument ( "1.0", "utf-8" );
+    //stylesheet
+    $xslt = $this->response_dom->createProcessingInstruction("xml-stylesheet", "type=\"text/xsl\" href=\"layout/oai2transform.xsl\"");    
+    $this->response_dom->appendChild($xslt);
+    //main xml  
     $this->response_oaipmh = $this->response_dom->createElement ( "OAI-PMH" );
     $attribute_xmlns = $this->response_dom->createAttribute ( "xmlns" );
     $attribute_xmlns->appendChild ( $this->response_dom->createTextNode ( "http://www.openarchives.org/OAI/2.0/" ) );
