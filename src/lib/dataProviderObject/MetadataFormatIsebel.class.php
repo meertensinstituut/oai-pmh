@@ -3,10 +3,12 @@
 namespace DataProviderObject;
 
 class MetadataFormatIsebel extends MetadataFormat {
-  const METADATAPREFIX = "oai_isebel";
-  const SCHEMA = "http://www.isebel.eu/OAI/2.0/oai_isebel.xsd";
-  const METADATANAMESPACE = "http://www.isebel.eu/OAI/2.0/oai_isebel/";
-  const PREFIX = "isebel";
+  const METADATAPREFIX = "isebel";
+  const SCHEMA = "http://www.isebel.eu/ns/isebel.xsd";
+  const METADATANAMESPACE = "http://www.isebel.eu/ns/isebel";
+  const METADATAPREFIXLOCAL = "mi";
+  const METADATANAMESPACELOCAL = "http://www.verhalenbank.nl/";
+  const NAME = "story";
   const MAINELEMENTS = array (
       "identifier",
       "url",
@@ -22,28 +24,35 @@ class MetadataFormatIsebel extends MetadataFormat {
   public function createMetadata($data, $dom) {
     if ($data != null && $data instanceof Metadata) {
       $response = $dom->createElement ( \DataProviderObject\Metadata::METADATA );
-      $metadata = $dom->createElement ( MetadataFormatIsebel::METADATAPREFIX . ":" . MetadataFormatIsebel::PREFIX );
-      // attributes
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIX, MetadataFormatIsebel::METADATANAMESPACE ) );
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::PREFIX, "http://purl.org/dc/elements/1.1/" ) );
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" ) );
-      $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatIsebel::METADATANAMESPACE . "\n " . MetadataFormatIsebel::SCHEMA ) );
-      foreach ( MetadataFormatIsebel::MAINELEMENTS as $mainElement ) {
-        if ($data->variableSet ( $mainElement )) {
-          $value = $data->get ( $mainElement );
+      if($data->get("type")=="story") {        
+        $metadata = $dom->createElement ( MetadataFormatIsebel::METADATAPREFIX . ":" . MetadataFormatIsebel::NAME );
+        // attributes
+        $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIX, MetadataFormatIsebel::METADATANAMESPACE ) );
+        $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:dcterms","http://purl.org/dc/terms/")); 
+        $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIXLOCAL, MetadataFormatIsebel::METADATANAMESPACELOCAL)); 
+        $metadata->appendChild ( $this->createAttribute ( $dom, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" ) );
+        $metadata->appendChild ( $this->createAttribute ( $dom, "xsi:schemaLocation", MetadataFormatIsebel::METADATANAMESPACE . " " . MetadataFormatIsebel::SCHEMA ) );        
+        if ($data->variableSet ( "id")) {
+          $value = $data->get ( "id" );
           if (is_string ( $value )) {
-            $metadata->appendChild ( $this->createItem ( $dom, MetadataFormatIsebel::PREFIX . ":" . $mainElement, $value ) );
-          } else if (is_array ( $value )) {
-            foreach ( $value as $subValue ) {
-              if (is_string ( $subValue )) {
-                $metadata->appendChild ( $this->createItem ( $dom, MetadataFormatIsebel::PREFIX . ":" . $mainElement, $subValue ) );
-              }
-            }
+            $metadata->appendChild ( $this->createAttribute ( $dom, "xml:id", "story".$value));
+            $this->createItem($dom, "dcterms:identifier", $data->get("url"), null, $metadata);
+            $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":content", $data->get("text"), array(array("xml:lang","nl")), $metadata);
+            $this->createGeoItem($dom, MetadataFormatIsebel::METADATAPREFIX.":geo", $data->get("location"), $metadata);
+            $this->createPersonItem($dom, MetadataFormatIsebel::METADATAPREFIX.":person", $data->get("narrator"), "narrator", $metadata);
+            if($data->variableSet("identifier")) {
+              $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIXLOCAL.":ref", $data->get("identifier"), null, $metadata);
+            }            
+          } else {
+            die("no unique id story");
           }
+        } else {
+          die ("no id story");
         }
-      }
-      // add to response
-      $response->appendChild ( $metadata );
+        // add to response
+        $response->appendChild ( $metadata );
+        
+      } 
       return $response;
     } else {
       die ( "incorrect call createMetadata" );
@@ -54,9 +63,58 @@ class MetadataFormatIsebel extends MetadataFormat {
     $attribute->appendChild ( $dom->createTextNode ( $value ) );
     return $attribute;
   }
-  private function createItem($dom, $name, $value) {
-    $item = $dom->createElement ( $name );
-    $item->appendChild ( $dom->createTextNode ( $value ) );
-    return $item;
+  private function createItem($dom, $name, $value, $attributes, $metadata) {
+    if($value && $metadata) {
+      if(is_string($value)) {
+        $item = $dom->createElement ( $name );
+        $item->appendChild ( $dom->createTextNode ( $value ) );
+        if($attributes && is_array($attributes)) {
+          foreach($attributes AS $attribute) {
+            $item->appendChild ( $this->createAttribute ( $dom, $attribute[0], $attribute[1]));
+          }
+        }
+        $metadata->appendChild($item);
+      } else if(is_array($value)) {
+        foreach($value AS $subValue) {
+          $this->createItem($dom, $name, $subValue, $attributes, $metadata);
+        }
+      }
+    }    
+  }
+  private function createGeoItem($dom, $name, $value, $metadata) {
+    if($value && is_array($value) && count($value)>0) {
+      if(is_array($value[0])) {
+        foreach($value AS $subValue) {
+          $this->createGeoItem($dom, $name, $subValue, $metadata);
+        }
+      } else {
+        $geo = $dom->createElement ( $name ); 
+        $geo->appendChild ( $this->createAttribute ( $dom, "xml:id", "geo".$value[0]));        
+        if(isset($value[0]) && $value[1]!=null && is_string($value[1]) && trim($value[1])!="") {
+          $this->createItem($dom, "dcterms:spatial", $value[1], null, $geo);
+        }
+        if(isset($value[1]) && $value[2]!=null && is_string($value[2]) && trim($value[2])!="") {
+          $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":latitude", $value[2], null, $geo);
+        }
+        if(isset($value[2]) && $value[3]!=null && is_string($value[3]) && trim($value[3])!="") {
+          $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":longitude", $value[3], null, $geo);
+        }
+        $metadata->appendChild($geo);
+      }
+    }
+  }
+  private function createPersonItem($dom, $name, $value, $role, $metadata) {
+    if($value) {
+      if(is_array($value)) {
+        foreach($value AS $subValue) {
+          $this->createPersonItem($dom, $name, $subValue, $role, $metadata);
+        }
+      } else if(is_string($value) && trim($value!="")) { 
+        $person = $dom->createElement ( $name ); 
+        $this->createItem($dom, "dcterms:contributor", $value, null, $person);
+        $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":role", $role, null, $person);
+        $metadata->appendChild($person);
+      }
+    }
   }
 }
