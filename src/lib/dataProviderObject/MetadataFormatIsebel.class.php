@@ -91,7 +91,7 @@ class MetadataFormatIsebel extends MetadataFormat {
         $geo = $dom->createElement ( $name ); 
         $geo->appendChild ( $this->createAttribute ( $dom, "xml:id", "geo".$value[0]));        
         if(isset($value[0]) && $value[1]!=null && is_string($value[1]) && trim($value[1])!="") {
-          $this->createItem($dom, "dcterms:spatial", $value[1], null, $geo);
+          $this->createItem($dom, "dcterms:spatial", $value[1], array(array("xml:lang","nl")), $geo);
         }
         if(isset($value[1]) && $value[2]!=null && is_string($value[2]) && trim($value[2])!="") {
           $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":latitude", $value[2], null, $geo);
