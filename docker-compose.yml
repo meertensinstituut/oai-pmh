@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  web:
+    build: ./web
+    ports:
+      - 80:80
+    depends_on:
+      - db
+    volumes:
+      - ./web/src:/var/www/html
+  db:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=dingqiqing
+      - MYSQL_DATABASE=oai-pmh
+      - MYSQL_USER=demo
+      - MYSQL_PASSWORD=demo
+  phpmyadmi:
+    image: 'phpmyadmin/phpmyadmin'
+    ports:
+      - 8080:80
+    depends_on:
+      - db
+    environment:
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=dingqiqing
+      - PMA_HOST=db
