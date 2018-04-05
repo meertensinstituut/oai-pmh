@@ -16,7 +16,7 @@ services:
     volumes:
       - ./db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=dingqiqing
+      - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=oai-pmh
       - MYSQL_USER=demo
       - MYSQL_PASSWORD=demo
@@ -28,5 +28,5 @@ services:
       - db
     environment:
       - MYSQL_USERNAME=root
-      - MYSQL_ROOT_PASSWORD=dingqiqing
+      - MYSQL_ROOT_PASSWORD=root
       - PMA_HOST=db
