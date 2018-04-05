@@ -12,6 +12,7 @@ abstract class DataProviderMysql extends DataProvider {
     $this->configuration = $configuration;
     $this->database = new \PDO ( "mysql:dbname=" . $this->configuration->get ( "mysqlDatabase" ) . "; host=" . $this->configuration->get ( "mysqlHost" ), $this->configuration->get ( "mysqlUsername" ), $this->configuration->get ( "mysqlPassword" ) );
     $this->database->setAttribute ( \PDO::ATTR_TIMEOUT, 5000 );
+    $this->database->exec("SET NAMES 'utf8';");
   }
   public function identify() {
     $identify = parent::identify();
