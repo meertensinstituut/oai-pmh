@@ -39,6 +39,7 @@ class MetadataFormatIsebel extends MetadataFormat {
             $metadata->appendChild ( $this->createAttribute ( $dom, "xml:id", "story".$value));
             $this->createItem($dom, "dcterms:identifier", $data->get("url"), null, $metadata);
             $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":content", $data->get("text"), array(array("xml:lang","nl")), $metadata);
+            $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX.":keyword", $data->get("keyword"), array(array("xml:lang","nl")), $metadata);
             $this->createGeoItem($dom, $data->get("location"), $metadata);
             $this->createPersonItem($dom, MetadataFormatIsebel::METADATAPREFIX.":person", $data->get("narrator"), "narrator", $metadata);
             if($data->variableSet("identifier")) {

@@ -174,7 +174,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
-                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`
+                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`, 
+                  GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`                   
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -186,11 +187,16 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ON `isebel_location`.`item_id` = `omeka_items`.`id`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator`
                 ON `isebel_narrator`.`record_type` = 'Item' AND `isebel_narrator`.`record_id` = `omeka_items`.`id` AND `isebel_narrator`.`element_id` = 39
+                LEFT JOIN `omeka_records_tags` AS `omeka_isebel_keyword`
+                ON `omeka_isebel_keyword`.`record_type` = 'Item' AND `omeka_isebel_keyword`.`record_id` = `omeka_items`.`id`
+                LEFT JOIN `omeka_tags` AS `isebel_keyword`
+                ON `isebel_keyword`.id = `omeka_isebel_keyword`.`tag_id`
                 WHERE (" . implode ( ") AND (", $conditions ) . ")
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
                 LIMIT " . intval ( $cursor ) . "," . intval ( $stepSize ) . "
                 "; 
+                // die($sql);
     } else {
       die("unknown metadataPrefix");
     }

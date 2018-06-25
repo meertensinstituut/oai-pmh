@@ -20,7 +20,7 @@ services:
       - MYSQL_DATABASE=oai-pmh
       - MYSQL_USER=demo
       - MYSQL_PASSWORD=demo
-  phpmyadmi:
+  phpmyadmin:
     image: 'phpmyadmin/phpmyadmin'
     ports:
       - 8080:80
