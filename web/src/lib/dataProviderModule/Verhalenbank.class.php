@@ -173,6 +173,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                   CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
+                  GROUP_CONCAT(DISTINCT(`isebel_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "date`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
                   GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`, 
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`                   
@@ -183,6 +184,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ON `isebel_identifier`.`record_type` = 'Item' AND `isebel_identifier`.`record_id` = `omeka_items`.`id` AND `isebel_identifier`.`element_id` = 43
                 LEFT JOIN `omeka_element_texts` AS `isebel_text`
                 ON `isebel_text`.`record_type` = 'Item' AND `isebel_text`.`record_id` = `omeka_items`.`id` AND `isebel_text`.`element_id` = 1
+                LEFT JOIN `omeka_element_texts` AS `isebel_date`
+                ON `isebel_date`.`record_type` = 'Item' AND `isebel_date`.`record_id` = `omeka_items`.`id` AND `isebel_date`.`element_id` = 40
                 LEFT JOIN `omeka_locations` AS `isebel_location`
                 ON `isebel_location`.`item_id` = `omeka_items`.`id`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator`
