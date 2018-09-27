@@ -6,49 +6,58 @@ use OAIPMH\DataProviderMysql;
 use DataProviderObject\MetadataFormatDC;
 use DataProviderObject\MetadataFormatIsebel;
 
-class Verhalenbank extends \OAIPMH\DataProviderMysql {
-  const SPLIT_CHARACTER1 = "|-|-|-|-|-|";
-  const SPLIT_CHARACTER2 = "|*|*|*|*|*|";
-  const PREFIX_HEADER = "header.";
-  const PREFIX_METADATA = "metadata.";
-  public function listMetadataFormats($identifier = null) {
-    $metadataFormats = parent::listMetadataFormats ( $identifier );
-    $metadataFormats->addMetadataFormat ( new \DataProviderObject\MetadataFormatDC () );
-    $metadataFormats->addMetadataFormat ( new \DataProviderObject\MetadataFormatIsebel () );
-    return $metadataFormats;
-  }
-  protected function getIdentifySql() {
-    list ( $binds, $conditions ) = $this->createItemsConditions ();
-    $sql = "SELECT 
+class Verhalenbank extends \OAIPMH\DataProviderMysql
+{
+    const SPLIT_CHARACTER1 = "|-|-|-|-|-|";
+    const SPLIT_CHARACTER2 = "|*|*|*|*|*|";
+    const PREFIX_HEADER = "header.";
+    const PREFIX_METADATA = "metadata.";
+
+    public function listMetadataFormats($identifier = null)
+    {
+        $metadataFormats = parent::listMetadataFormats($identifier);
+        $metadataFormats->addMetadataFormat(new \DataProviderObject\MetadataFormatDC ());
+        $metadataFormats->addMetadataFormat(new \DataProviderObject\MetadataFormatIsebel ());
+        return $metadataFormats;
+    }
+
+    protected function getIdentifySql()
+    {
+        list ($binds, $conditions) = $this->createItemsConditions();
+        $sql = "SELECT 
               UNIX_TIMESTAMP(MIN(`created`)) AS :fieldEarliestDatestamp 
               FROM `omeka_items`
-              WHERE (" . implode ( ") AND (", $conditions ) . ")
+              WHERE (" . implode(") AND (", $conditions) . ")
               ";
-    $binds[] = array(":fieldEarliestDatestamp", self::FIELD_EARLIESTDATESTAMP);
-    return array (
-        $sql,
-        $binds
-    );
-  }
-  protected function getSetsNumberSql() {
-    list ( $binds, $conditions ) = $this->createItemsConditions ();
-    $sql = "SELECT
+        $binds[] = array(":fieldEarliestDatestamp", self::FIELD_EARLIESTDATESTAMP);
+        return array(
+            $sql,
+            $binds
+        );
+    }
+
+    protected function getSetsNumberSql()
+    {
+        list ($binds, $conditions) = $this->createItemsConditions();
+        $sql = "SELECT
               COUNT(DISTINCT(`omeka_collections`.`id`)) AS :fieldNumber
               FROM `omeka_collections`
               INNER JOIN `omeka_items` 
               ON `omeka_collections`.`id` = `omeka_items`.`collection_id`
-              WHERE (" . implode ( ") AND (", $conditions ) . ")
+              WHERE (" . implode(") AND (", $conditions) . ")
               ORDER BY `omeka_collections`.`id`
               ";
-    $binds[] = array(":fieldNumber", self::FIELD_NUMBER);
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function getSetsListSql($cursor, $stepSize) {
-    list ( $binds, $conditions ) = $this->createItemsConditions ();
-    $sql = "SELECT
+        $binds[] = array(":fieldNumber", self::FIELD_NUMBER);
+        return array(
+            $sql,
+            $binds
+        );
+    }
+
+    protected function getSetsListSql($cursor, $stepSize)
+    {
+        list ($binds, $conditions) = $this->createItemsConditions();
+        $sql = "SELECT
                 `omeka_collections`.`id` AS `setSpec`,
                 `omeka_element_texts`.`text` AS `setName`,
                 `omeka_element_texts`.`text` AS `setDescription`
@@ -59,54 +68,62 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
               ON `omeka_collections`.`id` = `omeka_element_texts`.`record_id`
               AND `omeka_element_texts`.`record_type` = 'Collection'
               AND `omeka_element_texts`.`element_id` = 50
-              WHERE (" . implode ( ") AND (", $conditions ) . ")
+              WHERE (" . implode(") AND (", $conditions) . ")
               GROUP BY `omeka_collections`.`id`
               ORDER BY `omeka_collections`.`id`
-              LIMIT " . intval ( $cursor ) . "," . intval ( $stepSize );
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function getIdentifiersNumberSql($metadataPrefix, $set, $from, $until) {
-    list ( $binds, $conditions ) = $this->createItemsConditions ( $set, $from, $until );
-    $sql = "SELECT
+              LIMIT " . intval($cursor) . "," . intval($stepSize);
+        return array(
+            $sql,
+            $binds
+        );
+    }
+
+    protected function getIdentifiersNumberSql($metadataPrefix, $set, $from, $until)
+    {
+        list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
+        $sql = "SELECT
                 COUNT(*) AS :fieldNumber
               FROM `omeka_items`
               LEFT JOIN `omeka_collections`
               ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
-              WHERE (" . implode ( ") AND (", $conditions ) . ")";
-    $binds[] = array(":fieldNumber", self::FIELD_NUMBER);
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function getIdentifiersListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until) {
-    list ( $binds, $conditions ) = $this->createItemsConditions ( $set, $from, $until );
-    $sql = "SELECT
+              WHERE (" . implode(") AND (", $conditions) . ")";
+        $binds[] = array(":fieldNumber", self::FIELD_NUMBER);
+        return array(
+            $sql,
+            $binds
+        );
+    }
+
+    protected function getIdentifiersListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until)
+    {
+        list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
+        $sql = "SELECT
                 `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                 UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                 `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`
               FROM `omeka_items`
               LEFT JOIN `omeka_collections`
               ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
-              WHERE (" . implode ( ") AND (", $conditions ) . ")
+              WHERE (" . implode(") AND (", $conditions) . ")
               ORDER BY `omeka_items`.`id`
-              LIMIT " . intval ( $cursor ) . "," . intval ( $stepSize ) . "
+              LIMIT " . intval($cursor) . "," . intval($stepSize) . "
               ";
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function getRecordsNumberSql($metadataPrefix, $set, $from, $until) {
-    return $this->getIdentifiersNumberSql ( $metadataPrefix, $set, $from, $until );
-  }
-  protected function getRecordsListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until) {
-    list ( $binds, $conditions ) = $this->createItemsConditions ( $set, $from, $until );    
-    if($metadataPrefix==MetadataFormatDC::METADATAPREFIX) {
-      $sql = "SELECT
+        return array(
+            $sql,
+            $binds
+        );
+    }
+
+    protected function getRecordsNumberSql($metadataPrefix, $set, $from, $until)
+    {
+        return $this->getIdentifiersNumberSql($metadataPrefix, $set, $from, $until);
+    }
+
+    protected function getRecordsListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until)
+    {
+        list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
+        if ($metadataPrefix == MetadataFormatDC::METADATAPREFIX) {
+            $sql = "SELECT
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
@@ -158,17 +175,18 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ON `dc_title`.`record_type` = 'Item' AND `dc_title`.`record_id` = `omeka_items`.`id` AND `dc_title`.`element_id` = 50   
                 LEFT JOIN `omeka_element_texts` AS `dc_type`
                 ON `dc_type`.`record_type` = 'Item' AND `dc_type`.`record_id` = `omeka_items`.`id` AND `dc_type`.`element_id` = 51   
-                WHERE (" . implode ( ") AND (", $conditions ) . ")
+                WHERE (" . implode(") AND (", $conditions) . ")
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
-                LIMIT " . intval ( $cursor ) . "," . intval ( $stepSize ) . "
+                LIMIT " . intval($cursor) . "," . intval($stepSize) . "
                 ";
-    } else if($metadataPrefix==MetadataFormatIsebel::METADATAPREFIX) {
-      $sql = "SELECT                  
+        } else if ($metadataPrefix == MetadataFormatIsebel::METADATAPREFIX) {
+            $sql = "SELECT                  
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
                   'story' AS `" . self::PREFIX_METADATA . "type`,
+                  `isebel_type`.`text` AS `" . self::PREFIX_METADATA . "subgenre`,
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
                   CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
@@ -184,6 +202,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ON `isebel_identifier`.`record_type` = 'Item' AND `isebel_identifier`.`record_id` = `omeka_items`.`id` AND `isebel_identifier`.`element_id` = 43
                 LEFT JOIN `omeka_element_texts` AS `isebel_text`
                 ON `isebel_text`.`record_type` = 'Item' AND `isebel_text`.`record_id` = `omeka_items`.`id` AND `isebel_text`.`element_id` = 1
+                LEFT JOIN `omeka_element_texts` AS `isebel_type`
+                ON `isebel_type`.`record_type` = 'Item' AND `isebel_type`.`record_id` = `omeka_items`.`id` AND `isebel_type`.`element_id` = 58
                 LEFT JOIN `omeka_element_texts` AS `isebel_date`
                 ON `isebel_date`.`record_type` = 'Item' AND `isebel_date`.`record_id` = `omeka_items`.`id` AND `isebel_date`.`element_id` = 40
                 LEFT JOIN `omeka_locations` AS `isebel_location`
@@ -194,29 +214,31 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 ON `omeka_isebel_keyword`.`record_type` = 'Item' AND `omeka_isebel_keyword`.`record_id` = `omeka_items`.`id`
                 LEFT JOIN `omeka_tags` AS `isebel_keyword`
                 ON `isebel_keyword`.id = `omeka_isebel_keyword`.`tag_id`
-                WHERE (" . implode ( ") AND (", $conditions ) . ")
+                WHERE (" . implode(") AND (", $conditions) . ")      
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
-                LIMIT " . intval ( $cursor ) . "," . intval ( $stepSize ) . "
-                "; 
-                // die($sql);
-    } else {
-      die("unknown metadataPrefix");
+                LIMIT " . intval($cursor) . "," . intval($stepSize) . "
+                ";
+//             die($sql);
+        } else {
+            die("unknown metadataPrefix");
+        }
+        return array(
+            $sql,
+            $binds
+        );
     }
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function getRecordSql($identifier, $metadataPrefix) {
-    $binds = array (
-        array (
-            ":identifier",
-            $identifier 
-        ) 
-    );
-    if($metadataPrefix==MetadataFormatDC::METADATAPREFIX) {
-      $sql = "SELECT
+
+    protected function getRecordSql($identifier, $metadataPrefix)
+    {
+        $binds = array(
+            array(
+                ":identifier",
+                $identifier
+            )
+        );
+        if ($metadataPrefix == MetadataFormatDC::METADATAPREFIX) {
+            $sql = "SELECT
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
@@ -273,8 +295,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 AND `omeka_items`.`id` = :identifier
                 GROUP BY `omeka_items`.`id`
                 ";
-    } else if($metadataPrefix==MetadataFormatIsebel::METADATAPREFIX) {
-      $sql = "SELECT
+        } else if ($metadataPrefix == MetadataFormatIsebel::METADATAPREFIX) {
+            $sql = "SELECT
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
@@ -300,107 +322,129 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql {
                 AND NOT `omeka_items`.`featured`
                 AND `omeka_items`.`id` = :identifier
                 GROUP BY `omeka_items`.`id`                 
-                ";  
-    } else {
-      die("unknown metadataPrefix");
-    }
-    return array (
-        $sql,
-        $binds 
-    );
-  }
-  protected function filterIdentify($identifyData) {
-    return $identifyData;
-  }
-  protected function filterSetsNumber($setsNumberData) {
-    return $setsNumberData;
-  }
-  protected function filterSetsList($setsListData) {
-    return $setsListData;
-  }
-  protected function filterIdentifiersNumber($identifiersNumberData) {
-    return $identifiersNumberData;
-  }
-  protected function filterIdentifiersList($identifiersListData) {
-    return $identifiersListData;
-  }
-  protected function filterRecordsNumber($recordsNumberData) {
-    return $recordsNumberData;
-  }
-  protected function filterRecordsList($recordsListData) {
-    return $recordsListData;
-  }  
-  protected function filterRecord($recordData) {
-    return $recordData;
-  }  
-  protected function filterHeader($headerData) {
-    $filteredData = array ();
-    foreach ( $headerData as $key => $value ) {
-      if (preg_match ( "/^".preg_quote(self::PREFIX_HEADER)."(.*?)$/", $key, $match )) {
-        $filteredData [$match [1]] = $value;
-      }
-    }
-    return $filteredData;
-  }
-  protected function filterMetadata($metadataData, $metadataPrefix) {
-    $filteredData = array ();
-    foreach ( $metadataData as $key => $value ) {
-      if (preg_match ( "/^".preg_quote(self::PREFIX_METADATA)."(.*?)$/", $key, $match )) {
-        if ($value != null) {
-          if (strpos ( $value, self::SPLIT_CHARACTER1 ) !== false) {
-            $items = explode ( self::SPLIT_CHARACTER1, $value );
-            $filteredData [$match [1]] = array();
-            foreach($items AS $item) {
-              if (strpos ( $item, self::SPLIT_CHARACTER2 ) !== false) {
-                $filteredData [$match [1]][] = explode ( self::SPLIT_CHARACTER2, $item );
-              } else {
-                $filteredData [$match [1]][] = $item;
-              }
-            }
-          } else {
-            if (strpos ( $value, self::SPLIT_CHARACTER2 ) !== false) {
-              $filteredData [$match [1]] = explode ( self::SPLIT_CHARACTER2, $value );
-            } else {
-              $filteredData [$match [1]] = $value;
-            }
-          }
+                ";
         } else {
-          $filteredData [$match [1]] = $value;
+            die("unknown metadataPrefix");
         }
-      }
+        return array(
+            $sql,
+            $binds
+        );
     }
-    return $filteredData;
-  }
-  private function createItemsConditions($set = null, $from = null, $until = null) {
-    $binds = array ();
-    $conditions = array ();
-    $conditions [] = "`omeka_items`.`collection_id` in ( '1' )";
-    $conditions [] = "`omeka_items`.`public`";
-    $conditions [] = "NOT `omeka_items`.`featured`";
-    if ($set !== null) {
-      $conditions [] = "`omeka_items`.`collection_id` = :set";
-      $binds [] = array (
-          ":set",
-          $set 
-      );
+
+    protected function filterIdentify($identifyData)
+    {
+        return $identifyData;
     }
-    if ($from !== null) {
-      $conditions [] = "`omeka_items`.`modified` >= :from";
-      $binds [] = array (
-          ":from",
-          date ( "Y-m-d H:i:s", $from ) 
-      );
+
+    protected function filterSetsNumber($setsNumberData)
+    {
+        return $setsNumberData;
     }
-    if ($until !== null) {
-      $conditions [] = "`omeka_items`.`modified` <= :until";
-      $binds [] = array (
-          ":until",
-          date ( "Y-m-d H:i:s", $until ) 
-      );
+
+    protected function filterSetsList($setsListData)
+    {
+        return $setsListData;
     }
-    return array (
-        $binds,
-        $conditions 
-    );
-  }
+
+    protected function filterIdentifiersNumber($identifiersNumberData)
+    {
+        return $identifiersNumberData;
+    }
+
+    protected function filterIdentifiersList($identifiersListData)
+    {
+        return $identifiersListData;
+    }
+
+    protected function filterRecordsNumber($recordsNumberData)
+    {
+        return $recordsNumberData;
+    }
+
+    protected function filterRecordsList($recordsListData)
+    {
+        return $recordsListData;
+    }
+
+    protected function filterRecord($recordData)
+    {
+        return $recordData;
+    }
+
+    protected function filterHeader($headerData)
+    {
+        $filteredData = array();
+        foreach ($headerData as $key => $value) {
+            if (preg_match("/^" . preg_quote(self::PREFIX_HEADER) . "(.*?)$/", $key, $match)) {
+                $filteredData [$match [1]] = $value;
+            }
+        }
+        return $filteredData;
+    }
+
+    protected function filterMetadata($metadataData, $metadataPrefix)
+    {
+        $filteredData = array();
+        foreach ($metadataData as $key => $value) {
+            if (preg_match("/^" . preg_quote(self::PREFIX_METADATA) . "(.*?)$/", $key, $match)) {
+                if ($value != null) {
+                    if (strpos($value, self::SPLIT_CHARACTER1) !== false) {
+                        $items = explode(self::SPLIT_CHARACTER1, $value);
+                        $filteredData [$match [1]] = array();
+                        foreach ($items AS $item) {
+                            if (strpos($item, self::SPLIT_CHARACTER2) !== false) {
+                                $filteredData [$match [1]][] = explode(self::SPLIT_CHARACTER2, $item);
+                            } else {
+                                $filteredData [$match [1]][] = $item;
+                            }
+                        }
+                    } else {
+                        if (strpos($value, self::SPLIT_CHARACTER2) !== false) {
+                            $filteredData [$match [1]] = explode(self::SPLIT_CHARACTER2, $value);
+                        } else {
+                            $filteredData [$match [1]] = $value;
+                        }
+                    }
+                } else {
+                    $filteredData [$match [1]] = $value;
+                }
+            }
+        }
+        return $filteredData;
+    }
+
+    private function createItemsConditions($set = null, $from = null, $until = null)
+    {
+        $binds = array();
+        $conditions = array();
+        $conditions [] = "`omeka_items`.`collection_id` in ( '1' )";
+        $conditions [] = "`omeka_items`.`public`";
+        $conditions [] = "NOT `omeka_items`.`featured`";
+        if ($set !== null) {
+            $conditions [] = "`omeka_items`.`collection_id` = :set";
+            $binds [] = array(
+                ":set",
+                $set
+            );
+        }
+        if ($from !== null) {
+            $conditions [] = "`omeka_items`.`modified` >= :from";
+            $binds [] = array(
+                ":from",
+                date("Y-m-d H:i:s", $from)
+            );
+        }
+        if ($until !== null) {
+            $conditions [] = "`omeka_items`.`modified` <= :until";
+            $binds [] = array(
+                ":until",
+                date("Y-m-d H:i:s", $until)
+            );
+        }
+        return array(
+            $binds,
+            $conditions
+        );
+    }
 }

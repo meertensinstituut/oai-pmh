@@ -9,3 +9,5 @@
 **/config/*
 db/
 /nbproject/private/
+.idea/
+.idea/*
