@@ -13,6 +13,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     const PREFIX_HEADER = "header.";
     const PREFIX_METADATA = "metadata.";
 
+
     public function listMetadataFormats($identifier = null)
     {
         $metadataFormats = parent::listMetadataFormats($identifier);
@@ -179,9 +180,9 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
                 LIMIT " . intval($cursor) . "," . intval($stepSize) . "
-                ";
+                ;";
         } else if ($metadataPrefix == MetadataFormatIsebel::METADATAPREFIX) {
-            $sql = "SELECT                  
+            $sql = "SET SESSION group_concat_max_len=" . self::CONCAT_LENGTH . "; SELECT                  
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
@@ -190,7 +191,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
                   CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
-                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
+                  GROUP_CONCAT(DISTINCT(`isebel_text`.`text` SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   GROUP_CONCAT(DISTINCT(`isebel_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "date`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
                   GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`, 
@@ -322,7 +323,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 AND NOT `omeka_items`.`featured`
                 AND `omeka_items`.`id` = :identifier
                 GROUP BY `omeka_items`.`id`                 
-                ";
+                ;";
+//            die($sql);
         } else {
             die("unknown metadataPrefix");
         }

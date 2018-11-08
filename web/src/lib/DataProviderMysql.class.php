@@ -7,12 +7,15 @@ abstract class DataProviderMysql extends DataProvider {
   private $database;
   const FIELD_NUMBER = "number";
   const FIELD_EARLIESTDATESTAMP = "earliestDatestamp";
+  const CONCAT_LENGTH = "20480";
+
   public function __construct($cacheDirectory, $configuration) {
     parent::__construct ( $cacheDirectory, $configuration );
     $this->configuration = $configuration;
     $this->database = new \PDO ( "mysql:dbname=" . $this->configuration->get ( "mysqlDatabase" ) . "; host=" . $this->configuration->get ( "mysqlHost" ), $this->configuration->get ( "mysqlUsername" ), $this->configuration->get ( "mysqlPassword" ) );
     $this->database->setAttribute ( \PDO::ATTR_TIMEOUT, 5000 );
     $this->database->exec("SET NAMES 'utf8';");
+    $this->database->exec("SET SESSION group_concat_max_len=" . self::CONCAT_LENGTH . ";");
   }
   public function identify() {
     $identify = parent::identify();

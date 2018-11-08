@@ -28,6 +28,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
     public function createMetadata($data, $dom)
     {
+        $value = '0';
         if ($data != null && $data instanceof Metadata) {
             $response = $dom->createElement(\DataProviderObject\Metadata::METADATA);
             if ($data->get("type") == "story") {
@@ -53,6 +54,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         if ($data->variableSet("identifier")) {
                             $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIXLOCAL . ":ref", $data->get("identifier"), null, $metadata);
                         }
+//                        print($data->get("text"));
                     } else {
                         die("no unique id story");
                     }
