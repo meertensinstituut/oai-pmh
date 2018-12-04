@@ -4,6 +4,7 @@ namespace DataProviderModule;
 
 use OAIPMH\DataProviderBroker;
 use DataProviderObject\MetadataFormatDC;
+use DataProviderObject\MetadataFormatCMDI;
 
 class Nederlab extends \OAIPMH\DataProviderBroker {
   const PREFIX_HEADER = "header.";
@@ -11,6 +12,7 @@ class Nederlab extends \OAIPMH\DataProviderBroker {
   public function listMetadataFormats($identifier = null) {
     $metadataFormats = parent::listMetadataFormats ( $identifier );
     $metadataFormats->addMetadataFormat ( new \DataProviderObject\MetadataFormatDC () );
+    $metadataFormats->addMetadataFormat ( new \DataProviderObject\MetadataFormatCMDI () );
     return $metadataFormats;
   }
   protected function getIdentifiyBrokerQuery() {
@@ -90,6 +92,11 @@ class Nederlab extends \OAIPMH\DataProviderBroker {
           self::PREFIX_METADATA . "type:NLProfile_name",
           self::PREFIX_METADATA . "source:NLCore_NLIdentification_sourceRef" 
       );
+    } else if ($metadataPrefix == MetadataFormatCMDI::METADATAPREFIX) {
+      $request ["response"] ["documents"] ["fields"] = array (
+          self::PREFIX_HEADER . "identifier:NLCore_NLIdentification_versionID",
+          self::PREFIX_METADATA . "identifier:NLCore_NLIdentification_nederlabID"
+      );
     } else {
       die ( "unknown metadataPrefix" );
     }
@@ -121,6 +128,12 @@ class Nederlab extends \OAIPMH\DataProviderBroker {
           self::PREFIX_METADATA . "title.2:NLPerson_NLPersonName_preferredFullName",
           self::PREFIX_METADATA . "type:NLProfile_name",
           self::PREFIX_METADATA . "source:NLCore_NLIdentification_sourceRef" 
+      );
+    } else if ($metadataPrefix == MetadataFormatCMDI::METADATAPREFIX) {
+      $request ["response"] ["documents"] ["fields"] = array (
+          self::PREFIX_HEADER . "identifier:NLCore_NLIdentification_versionID",
+          self::PREFIX_HEADER . "datestamp:NLCore_NLAdministrative_ingestTime",
+          self::PREFIX_METADATA . "identifier:NLCore_NLIdentification_nederlabID"
       );
     } else {
       die ( "unknown metadataPrefix" );
