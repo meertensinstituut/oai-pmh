@@ -187,6 +187,7 @@ class Nederlab extends \OAIPMH\DataProviderBroker {
     $filteredData = array ();
     foreach ( $headerData as $key => $value ) {
       if (preg_match ( "/^" . preg_quote ( self::PREFIX_HEADER ) . "(.*?)$/", $key, $match )) {
+        error_log("filterHeader: match=" . print_r($match, true));
         if ($match [1] == "datestamp") {
           list ( $newValue, $granularity ) = $this->convertDateTimeToTimeStamp ( $value, self::GRANULARITY_DATETIME );
           if ($granularity !== null) {
@@ -219,6 +220,7 @@ class Nederlab extends \OAIPMH\DataProviderBroker {
         }
       }
     }
+    error_log("filterMetadata: result=" . print_r($filteredData, true));
     return $filteredData;
   }
   private function createItemsConditions($set = null, $from = null, $until = null) {
