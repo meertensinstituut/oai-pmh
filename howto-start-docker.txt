@@ -1,0 +1,3 @@
+EXAMPLE:
+
+$ docker run -it --mount type=bind,readonly,source="/home/jong/src/oai-pmh/src/lib",target=/var/www/html/oaipmh/lib -p 8080:80 --name oai-pmh oai-pmh
