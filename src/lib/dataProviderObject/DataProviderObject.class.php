@@ -23,19 +23,19 @@ abstract class DataProviderObject {
     return $this->errorText;
   }
   public function setError($code, $text = null) {
-    if ($code != null && is_string ( $code )) {
+    if ($code != null && is_string( $code )) {
       if ($this->errorCode == null) {
         $this->errorCode = $code;
-        if($text!=null) {
-          if(is_string($text)) {
+        if ($text != null) {
+          if (is_string( $text )) {
             $this->errorText = $text;
           } else {
-            die("incorrect call setError");
+            die( "incorrect call setError" );
           }
-        } 
+        }
       }
     } else {
-      die("incorrect call setError");
+      die( "incorrect call setError" );
     }
   }
   public function needResumption() {
