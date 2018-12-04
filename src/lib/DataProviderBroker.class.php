@@ -91,8 +91,10 @@ abstract class DataProviderBroker extends DataProvider {
     return $listRecords;
   }
   public function getRecord($identifier, $metadataPrefix) {
+    error_log("id: " . $identifier . " prefix: " . $metadataPrefix);
     $getRecord = parent::getRecord ( $identifier, $metadataPrefix );
     if (($response = $this->executeBrokerQuery ( $this->getRecordBrokerQuery ( $getRecord->getIdentifier (), $getRecord->getMetadataPrefix () ) )) != null) {
+      error_log("response: ". print_r($response, true));
       if ($response = $this->filterRecord($response)) {
         $header = new \DataProviderObject\Header ( $this->filterHeader ( $response ) );
         $getRecord->setHeader ( $header );
