@@ -28,7 +28,6 @@ class MetadataFormatIsebel extends MetadataFormat
 
     public function createMetadata($data, $dom)
     {
-        $value = '0';
         if ($data != null && $data instanceof Metadata) {
             $response = $dom->createElement(\DataProviderObject\Metadata::METADATA);
             if ($data->get("type") == "story") {
@@ -46,7 +45,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         $metadata->appendChild($this->createAttribute($dom, "xml:id", "story" . $value));
                         $this->createItem($dom, "dcterms:identifier", $data->get("url"), null, $metadata);
                         $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":subgenre", $data->get("subgenre"), array(array("xml:lang", "nl")), $metadata);
-                        $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $data->get("text"), array(array("xml:lang", "nl")), $metadata);
+                        $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = preg_replace('/[\x00-\x1F\x7F]/u', '', $data->get("text")), array(array("xml:lang", "nl")), $metadata);
                         $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":date", $data->get("date"), array(array("xml:lang", "nl")), $metadata);
                         $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata);
                         $this->createGeoItem($dom, $data->get("location"), $metadata);
