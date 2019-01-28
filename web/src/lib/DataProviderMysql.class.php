@@ -114,7 +114,6 @@ abstract class DataProviderMysql extends DataProvider {
         die ( "couldn't get records from database" );
       }
     }
-//    die($listRecords);
     return $listRecords;
   }
   public function getRecord($identifier, $metadataPrefix) {

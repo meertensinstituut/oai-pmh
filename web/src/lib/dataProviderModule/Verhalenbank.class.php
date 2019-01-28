@@ -214,12 +214,14 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 LEFT JOIN `omeka_records_tags` AS `omeka_isebel_keyword`
                 ON `omeka_isebel_keyword`.`record_type` = 'Item' AND `omeka_isebel_keyword`.`record_id` = `omeka_items`.`id`
                 LEFT JOIN `omeka_tags` AS `isebel_keyword`
-                ON `isebel_keyword`.id = `omeka_isebel_keyword`.`tag_id`
-                WHERE (" . implode(") AND (", $conditions) . ")      
+                ON `isebel_keyword`.id = `omeka_isebel_keyword`.`tag_id` 
+                WHERE (" . implode(") AND (", $conditions) . ") 
+                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
                 LIMIT " . intval($cursor) . "," . intval($stepSize) . "
                 ";
+//            die($sql);
         } else {
             die("unknown metadataPrefix");
         }
@@ -321,9 +323,9 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 WHERE `omeka_items`.`public`
                 AND NOT `omeka_items`.`featured`
                 AND `omeka_items`.`id` = :identifier
+                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item') 
                 GROUP BY `omeka_items`.`id`                 
                 ;";
-//            die($sql);
         } else {
             die("unknown metadataPrefix");
         }
