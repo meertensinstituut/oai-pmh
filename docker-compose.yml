@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   web:
+    container_name: web
     build: ./web
     ports:
       - 80:80
@@ -10,6 +11,7 @@ services:
     volumes:
       - ./web/src:/var/www/html
   db:
+    container_name: db
     image: mariadb:latest
     ports:
       - 3306:3306
@@ -21,6 +23,7 @@ services:
       - MYSQL_USER=demo
       - MYSQL_PASSWORD=demo
   phpmyadmin:
+    container_name: phpmyadmin
     image: 'phpmyadmin/phpmyadmin'
     ports:
       - 8080:80

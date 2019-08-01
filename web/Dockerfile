@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y  mariadb-client php-mysql php-mysqli lo
     locale-gen en_US.UTF-8 en_US && update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en
     
 RUN service apache2 stop && \
+    sed -i 's/display_errors = Off/display_errors = On/g' /etc/php/7.0/apache2/php.ini && \
     echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && \
     a2enconf fqdn && \
     rm -rf /var/www/html/* && \
