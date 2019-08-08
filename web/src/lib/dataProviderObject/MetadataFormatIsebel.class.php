@@ -34,6 +34,7 @@ class MetadataFormatIsebel extends MetadataFormat
                 $metadata = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":" . MetadataFormatIsebel::NAME);
                 // attributes
                 $metadata->appendChild($this->createAttribute($dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIX, MetadataFormatIsebel::METADATANAMESPACE));
+                $metadata->appendChild($this->createAttribute($dom, "xmlns:dc", "http://purl.org/dc/elements/1.1/"));
                 $metadata->appendChild($this->createAttribute($dom, "xmlns:dcterms", "http://purl.org/dc/terms/"));
                 $metadata->appendChild($this->createAttribute($dom, "xmlns:datacite", "http://datacite.org/schema/kernel-4"));
                 $metadata->appendChild($this->createAttribute($dom, "xmlns:" . MetadataFormatIsebel::METADATAPREFIXLOCAL, MetadataFormatIsebel::METADATANAMESPACELOCAL));
