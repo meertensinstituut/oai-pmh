@@ -46,21 +46,14 @@ class MetadataFormatIsebel extends MetadataFormat
                         $metadata->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
                         $this->createItem($dom, "dc:identifier", $data->get("url"), null, $metadata);
                         $this->createItem($dom, "dc:type", $data->get("subgenre"), array(array("xml:lang", "nl")), $metadata);
-                        /* tale types ?????? */
-                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":taleType", "taletypevalue", array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":taleType");
+                        /* ttt stands for tale type text */
+                        $this->createTaleTypeItem($dom, $data->get("ttt"), $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = preg_replace('/[\x00-\x1F\x7F]/u', '', $data->get("text")), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
-//                        $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":date", $data->get("date"), array(array("xml:lang", "nl")), $metadata);
                         $this->createGeoItem($dom, $data->get("location"), $metadata);
                         $this->createPersonItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":person", $data->get("narrator"), "narrator", $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), "narration", $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":keywords");
 
-                        /* original identifier from verhalenbank is not used anymore*/
-                        /*
-                        if ($data->variableSet("identifier")) {
-                            $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIXLOCAL . ":ref", $data->get("identifier"), null, $metadata);
-                        }
-                        */
                     } else {
                         die("no unique id story");
                     }
@@ -167,6 +160,32 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
+    private function createTaleTypeItem($dom, $value, $metadata, $mainRequest = true)
+    {
+        if ($value && is_array($value) && count($value) > 0) {
+            if (is_array($value[0])) {
+                $geo = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":taleTypes");
+                foreach ($value AS $subValue) {
+                    $this->createTaleTypeItem($dom, $subValue, $geo, false);
+                }
+                $metadata->appendChild($geo);
+            } else {
+                if ($mainRequest) {
+                    $geo = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":taleTypes");
+                    $metadata->appendChild($geo);
+                } else {
+                    $geo = $metadata;
+                }
+                $geoLocation = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":taleType");
+                $geoLocation->appendChild($this->createAttribute($dom, "number", $value[0]));
+                $geoLocation->appendChild($this->createAttribute($dom, "title", $value[1]));
+
+                $geo->appendChild($geoLocation);
+
+            }
+        }
+    }
+
     private function createPersonItem($dom, $name, $value, $role, $metadata, $mainRequest = true)
     {
         if ($value) {
@@ -178,7 +197,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
                 if (is_array($value)) {
                     foreach ($value AS $subValue) {
-                        $this->createPersonItem($dom, $name, $subValue, $role, $metadata);
+                        $this->createPersonItem($dom, $name, $subValue, $role, $metadata, false);
                     }
                 } else if (is_string($value) && trim($value != "")) {
                     $person = $dom->createElement($name);
@@ -201,7 +220,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
                 if (is_array($value)) {
                     foreach ($value AS $subValue) {
-                        $this->createEventItem($dom, $name, $subValue, $role, $metadata);
+                        $this->createEventItem($dom, $name, $subValue, $role, $metadata, false);
                     }
                 } else if (is_string($value) && trim($value != "")) {
                     $event = $dom->createElement($name);
