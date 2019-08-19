@@ -51,7 +51,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         $this->createTaleTypeItem($dom, $data->get("ttt"), $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = preg_replace('/[\x00-\x1F\x7F]/u', '', $data->get("text")), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
                         $this->createGeoItem($dom, $data->get("location"), $metadata);
-                        $this->createPersonItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":person", $data->get("narrator"), "narrator", $metadata);
+                        $this->createPersonItem($dom, $data->get("narrator"), $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), "narration", $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":keywords");
 
@@ -187,26 +187,34 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
-    private function createPersonItem($dom, $name, $value, $role, $metadata, $mainRequest = true)
+    private function createPersonItem($dom, $value, $metadata, $mainRequest = true)
     {
-        if ($value) {
-            if ($mainRequest) {
+
+        if ($value && is_array($value) && count($value) > 0) {
+            if (is_array($value[0])) {
                 $persons = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":persons");
-                $this->createPersonItem($dom, $name, $value, $role, $persons, false);
+                foreach ($value AS $subValue) {
+                    $this->createPersonItem($dom, $subValue, $persons, false);
+                }
                 $metadata->appendChild($persons);
             } else {
-
-                if (is_array($value)) {
-                    foreach ($value AS $subValue) {
-                        $this->createPersonItem($dom, $name, $subValue, $role, $metadata, false);
-                    }
-                } else if (is_string($value) && trim($value != "")) {
-                    $person = $dom->createElement($name);
-                    $this->createItem($dom, "dcterms:contributor", $value, null, $person);
-                    $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":role", $role, null, $person);
-                    $metadata->appendChild($person);
+                if ($mainRequest) {
+                    $persons = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":persons");
+                    $metadata->appendChild($persons);
+                } else {
+                    $persons = $metadata;
                 }
+                $person = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":person");
+                $person->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
+
+                $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":name", $value[0], null, $person);
+                $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $value[1], null, $person);
+                $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":role", "narrator", null, $person);
+
+                $persons->appendChild($person);
+
             }
+
         }
     }
 

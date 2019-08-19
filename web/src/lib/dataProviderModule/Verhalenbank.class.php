@@ -194,9 +194,9 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   GROUP_CONCAT(DISTINCT(`isebel_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "date`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
-                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`, 
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
-                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`
+                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
+                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_narrator`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_narrator_gender_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -222,6 +222,10 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ON `isebel_taletype_title`.`record_type` = 'Item' AND `isebel_taletype_title`.`element_id` = 43 AND `isebel_taletype_title`.`text`= `isebel_taletypes`.`text` 
                 LEFT JOIN `omeka_element_texts` AS `isebel_taletype_title_text`
                 ON `isebel_taletype_title_text`.`record_type` = 'Item' AND `isebel_taletype_title_text`.`element_id` = 50 AND `isebel_taletype_title_text`.`record_id`= `isebel_taletype_title`.`record_id` 
+                LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender`
+                ON `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
+                LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
+                ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
                 WHERE (" . implode(") AND (", $conditions) . ") 
                 AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 GROUP BY `omeka_items`.`id`    
