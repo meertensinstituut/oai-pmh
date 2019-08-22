@@ -227,7 +227,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
                 WHERE (" . implode(") AND (", $conditions) . ") 
-                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
+                AND `omeka_items`.`id` not in (SELECT DISTINCT(record_id) FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
+                AND `omeka_items`.`id` in (SELECT DISTINCT(record_id) FROM `omeka_element_texts` where text = 'sage' AND `element_id`=58 AND record_type = 'Item')       
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
                 LIMIT " . intval($cursor) . "," . intval($stepSize) . "
