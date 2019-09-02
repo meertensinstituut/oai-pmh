@@ -320,10 +320,23 @@ class Server
                     $response->appendChild($this->createRecord($recordItem, $this->dataProvider));
                 }
             }
+
+            // use last record id as the new cursor
+            if (get_class($dataProviderObject) == "DataProviderObject\Records") {
+                $currentRecords = $dataProviderObject->getRecords();
+                $lastRecord = end($currentRecords);
+                if ($lastRecord) {
+                    $currentId = intval($lastRecord->getIdentifier());
+                    $dataProviderObject->setCurrentId($currentId);
+                }
+//            error_log("SERVER: current Id is: " . $currentId);
+            }
+
             // // resumptionToken
             if ($resumptionToken != null || $dataProviderObject->needResumption()) {
                 $response->appendChild($this->createResumptionToken($dataProviderObject));
             }
+
             $this->response_oaipmh->appendChild($response);
         }
     }
@@ -341,6 +354,7 @@ class Server
         } else {
             return;
         }
+
         if (count($this->arguments) > $validArguments) {
             $this->error(Server::ERROR_BADARGUMENT);
             return;
@@ -405,6 +419,12 @@ class Server
         $attribute_resumptionTokenCursor = $this->response_dom->createAttribute("cursor");
         $attribute_resumptionTokenCursor->appendChild($this->response_dom->createTextNode($dataProviderObject->getCursor()));
         $response_resumptionToken->appendChild($attribute_resumptionTokenCursor);
+        // current Id
+        if (get_class($dataProviderObject) == "DataProviderObject\Records") {
+            $attribute_resumptionCurrentId = $this->response_dom->createAttribute("currentId");
+            $attribute_resumptionCurrentId->appendChild($this->response_dom->createTextNode($dataProviderObject->getCurrentId()));
+            $response_resumptionToken->appendChild($attribute_resumptionCurrentId);
+        }
         // new token
         if ($dataProviderObject->needResumption()) {
             list ($newResumptionToken, $newExpirationDate) = $this->dataProvider->createResumption($this->timeoutResumption, $dataProviderObject);

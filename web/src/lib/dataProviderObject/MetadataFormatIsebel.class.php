@@ -209,6 +209,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":name", $value[0], null, $person);
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $value[1], null, $person);
+//                die("value is: ". var_dump($value));
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":role", "narrator", null, $person);
 
                 $persons->appendChild($person);

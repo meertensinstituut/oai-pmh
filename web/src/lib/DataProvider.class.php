@@ -52,7 +52,8 @@ abstract class DataProvider {
           \"set\" TEXT,
           \"from\" TEXT,
           \"until\" TEXT,
-          \"expires\" TEXT NOT NULL);";
+          \"expires\" TEXT NOT NULL, 
+          \"currentId\" INTEGER );";
     $query = $this->database->prepare ( $sql );
     $query->execute ();
     unset ( $query );
@@ -106,6 +107,7 @@ abstract class DataProvider {
       if ($data = $this->getResumption ( $resumptionToken, self::TYPE_RECORDS )) {
         $records = new \DataProviderObject\Records ( $data [Server::ARGUMENT_METDATAPREFIX], $data [Server::ARGUMENT_SET], $data [Server::ARGUMENT_FROM], $data [Server::ARGUMENT_UNTIL] );
         $records->setCursor ( intval ( $data ["cursor"] ) );
+        $records->setCurrentId( intval ( $data ["currentId"] ) );
         $records->setCompleteListSize ( intval ( $data ["completeListSize"] ) );
       } else {
         $records = new \DataProviderObject\Records ( $metadataPrefix, $set, $from, $until );
@@ -146,7 +148,7 @@ abstract class DataProvider {
       return null;
     }
   }
-  private function createResumptionToken($timeout, $type, $cursor, $completeListSize, $metadataPrefix, $set, $from, $until) {
+  private function createResumptionToken($timeout, $type, $cursor, $completeListSize, $metadataPrefix, $set, $from, $until, $currentId = 0) {
     // create token
     $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     $charactersLength = strlen ( $characters );
@@ -158,19 +160,20 @@ abstract class DataProvider {
     // store in database
     $this->clearResumption ();
     $sql = "INSERT OR IGNORE INTO \"resumptionToken\"
-    (\"token\", \"type\", \"cursor\", \"completeListSize\", \"metadataPrefix\", \"set\", \"from\", \"until\", \"expires\")
-    VALUES (:token, :type, :cursor, :completeListSize, :metadataPrefix, :set, :from, :until, datetime(:expires, 'unixepoch'))";
+    (\"currentId\", \"token\", \"type\", \"cursor\", \"completeListSize\", \"metadataPrefix\", \"set\", \"from\", \"until\", \"expires\")
+    VALUES (:currentId, :token, :type, :cursor, :completeListSize, :metadataPrefix, :set, :from, :until, datetime(:expires, 'unixepoch'))";
     $query = $this->database->prepare ( $sql );
-    $query->bindValue ( ":token", $resumptionToken );
-    $query->bindValue ( ":type", $type );
-    $query->bindValue ( ":cursor", $cursor );
-    $query->bindValue ( ":completeListSize", $completeListSize );
-    $query->bindValue ( ":metadataPrefix", $metadataPrefix );
-    $query->bindValue ( ":set", $set );
-    $query->bindValue ( ":from", $from );
-    $query->bindValue ( ":until", $until );
-    $query->bindValue ( ":expires", $expiration );
-    $query->execute ();
+      $query->bindValue ( ":type", $type );
+      $query->bindValue ( ":cursor", $cursor );
+      $query->bindValue ( ":completeListSize", $completeListSize );
+      $query->bindValue ( ":metadataPrefix", $metadataPrefix );
+      $query->bindValue ( ":set", $set );
+      $query->bindValue ( ":from", $from );
+      $query->bindValue ( ":until", $until );
+      $query->bindValue ( ":expires", $expiration );
+      $query->bindValue ( ":currentId", $currentId );
+      $query->bindValue ( ":token", $resumptionToken );
+      $query->execute ();
     unset ( $query );
     // return
     return array (
@@ -184,7 +187,7 @@ abstract class DataProvider {
     } else if ($dataProviderObject instanceof \DataProviderObject\Identifiers) {
       return $this->createResumptionToken ( $timeout, self::TYPE_IDENTIFIERS, $dataProviderObject->getCursor () + $dataProviderObject->getStepSize (), $dataProviderObject->getCompleteListSize (), $dataProviderObject->getMetadataPrefix (), $dataProviderObject->getSet (), $dataProviderObject->getFrom (), $dataProviderObject->getUntil () );
     } else if ($dataProviderObject instanceof \DataProviderObject\Records) {
-      return $this->createResumptionToken ( $timeout, self::TYPE_RECORDS, $dataProviderObject->getCursor () + $dataProviderObject->getStepSize (), $dataProviderObject->getCompleteListSize (), $dataProviderObject->getMetadataPrefix (), $dataProviderObject->getSet (), $dataProviderObject->getFrom (), $dataProviderObject->getUntil () );
+      return $this->createResumptionToken ( $timeout, self::TYPE_RECORDS, $dataProviderObject->getCursor () + $dataProviderObject->getStepSize (), $dataProviderObject->getCompleteListSize (), $dataProviderObject->getMetadataPrefix (), $dataProviderObject->getSet (), $dataProviderObject->getFrom (), $dataProviderObject->getUntil (), $dataProviderObject->getCurrentId() );
     } else {
       die ( "incorrect call createResumption" );
     }

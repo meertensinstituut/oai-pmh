@@ -6,6 +6,8 @@ use OAIPMH\DataProviderMysql;
 use DataProviderObject\MetadataFormatDC;
 use DataProviderObject\MetadataFormatIsebel;
 
+ini_set('error_log', '/tmp/php.log');
+
 class Verhalenbank extends \OAIPMH\DataProviderMysql
 {
     const SPLIT_CHARACTER1 = "|-|-|-|-|-|";
@@ -120,7 +122,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
         return $this->getIdentifiersNumberSql($metadataPrefix, $set, $from, $until);
     }
 
-    protected function getRecordsListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until)
+    protected function getRecordsListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until, $currentId = 0)
     {
         list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
         if ($metadataPrefix == MetadataFormatDC::METADATAPREFIX) {
@@ -196,7 +198,12 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
-                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_narrator`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_narrator_gender_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`
+                  IF(GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator_gender_text`.`text`)) SEPARATOR '') in ('m', 'v'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', `isebel_narrator_gender_text`.`text`))
+                       SEPARATOR '|-|-|-|-|-|'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', ''))
+                       SEPARATOR '|-|-|-|-|-|')
+                    ) AS `metadata.narrator`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -227,13 +234,16 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
                 WHERE (" . implode(") AND (", $conditions) . ") 
-                AND `omeka_items`.`id` not in (SELECT DISTINCT(record_id) FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
-                AND `omeka_items`.`id` in (SELECT DISTINCT(record_id) FROM `omeka_element_texts` where text = 'sage' AND `element_id`=58 AND record_type = 'Item')       
+                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
+                AND `isebel_type`.`text` = 'sage'     
+                AND `omeka_items`.`id` > " . intval($currentId) . "
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
-                LIMIT " . intval($cursor) . "," . intval($stepSize) . "
+                LIMIT " . intval($stepSize) . "
                 ";
+//            $badIds = [125516];
 //            die($sql);
+//            error_log("DATA: current Id is: " . $currentId);
         } else {
             die("unknown metadataPrefix");
         }
@@ -310,17 +320,26 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 GROUP BY `omeka_items`.`id`
                 ";
         } else if ($metadataPrefix == MetadataFormatIsebel::METADATAPREFIX) {
-            $sql = "SELECT
+            $sql = "SELECT                  
                   `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
                   'story' AS `" . self::PREFIX_METADATA . "type`,
+                  `isebel_type`.`text` AS `" . self::PREFIX_METADATA . "subgenre`,
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
                   CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
+                  GROUP_CONCAT(DISTINCT(`isebel_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "date`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
-                  GROUP_CONCAT(DISTINCT(`isebel_narrator`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "narrator`
+                  GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
+                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
+                  IF(GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator_gender_text`.`text`)) SEPARATOR '') in ('m', 'v'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', `isebel_narrator_gender_text`.`text`))
+                       SEPARATOR '|-|-|-|-|-|'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', ''))
+                       SEPARATOR '|-|-|-|-|-|')
+                    ) AS `metadata.narrator`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -328,16 +347,32 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ON `isebel_identifier`.`record_type` = 'Item' AND `isebel_identifier`.`record_id` = `omeka_items`.`id` AND `isebel_identifier`.`element_id` = 43
                 LEFT JOIN `omeka_element_texts` AS `isebel_text`
                 ON `isebel_text`.`record_type` = 'Item' AND `isebel_text`.`record_id` = `omeka_items`.`id` AND `isebel_text`.`element_id` = 1
+                LEFT JOIN `omeka_element_texts` AS `isebel_type`
+                ON `isebel_type`.`record_type` = 'Item' AND `isebel_type`.`record_id` = `omeka_items`.`id` AND `isebel_type`.`element_id` = 58
+                LEFT JOIN `omeka_element_texts` AS `isebel_date`
+                ON `isebel_date`.`record_type` = 'Item' AND `isebel_date`.`record_id` = `omeka_items`.`id` AND `isebel_date`.`element_id` = 40
                 LEFT JOIN `omeka_locations` AS `isebel_location`
                 ON `isebel_location`.`item_id` = `omeka_items`.`id`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator`
                 ON `isebel_narrator`.`record_type` = 'Item' AND `isebel_narrator`.`record_id` = `omeka_items`.`id` AND `isebel_narrator`.`element_id` = 39
-                WHERE `omeka_items`.`public`
-                AND NOT `omeka_items`.`featured`
-                AND `omeka_items`.`id` = :identifier
-                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item') 
-                GROUP BY `omeka_items`.`id`                 
-                ;";
+                LEFT JOIN `omeka_records_tags` AS `omeka_isebel_keyword`
+                ON `omeka_isebel_keyword`.`record_type` = 'Item' AND `omeka_isebel_keyword`.`record_id` = `omeka_items`.`id`
+                LEFT JOIN `omeka_tags` AS `isebel_keyword`
+                ON `isebel_keyword`.id = `omeka_isebel_keyword`.`tag_id` 
+                LEFT JOIN `omeka_element_texts` AS `isebel_taletypes` 
+                ON `isebel_taletypes`.`record_type` = 'Item' AND `isebel_taletypes`.`record_id` = `omeka_items`.`id` AND `isebel_taletypes`.`element_id` = 49  
+                LEFT JOIN `omeka_element_texts` AS `isebel_taletype_title`
+                ON `isebel_taletype_title`.`record_type` = 'Item' AND `isebel_taletype_title`.`element_id` = 43 AND `isebel_taletype_title`.`text`= `isebel_taletypes`.`text` 
+                LEFT JOIN `omeka_element_texts` AS `isebel_taletype_title_text`
+                ON `isebel_taletype_title_text`.`record_type` = 'Item' AND `isebel_taletype_title_text`.`element_id` = 50 AND `isebel_taletype_title_text`.`record_id`= `isebel_taletype_title`.`record_id` 
+                LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender`
+                ON `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
+                LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
+                ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
+                WHERE `omeka_items`.`id` = :identifier
+                GROUP BY `omeka_items`.`id`    
+                ";
+//            die($sql);
         } else {
             die("unknown metadataPrefix");
         }
