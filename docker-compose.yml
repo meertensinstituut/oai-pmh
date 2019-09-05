@@ -7,11 +7,11 @@ services:
     ports:
       - 80:80
     depends_on:
-      - db
+      - db-oaipmh
     volumes:
       - ./web/src:/var/www/html
-  db:
-    container_name: db
+  db-oaipmh:
+    container_name: db-oaipmh
     image: mariadb:latest
     ports:
       - 3306:3306
@@ -28,8 +28,8 @@ services:
     ports:
       - 8080:80
     depends_on:
-      - db
+      - db-oaipmh
     environment:
       - MYSQL_USERNAME=root
       - MYSQL_ROOT_PASSWORD=root
-      - PMA_HOST=db
+      - PMA_HOST=db-oaipmh

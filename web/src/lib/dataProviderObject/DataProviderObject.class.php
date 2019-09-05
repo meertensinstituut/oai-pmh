@@ -5,7 +5,7 @@ namespace DataProviderObject;
 abstract class DataProviderObject {
   private $errorCode;
   private $errorText;
-  const DEFAULT_STEPSIZE = 1000;
+  const DEFAULT_STEPSIZE = 100;
   public function __construct() {
     $this->resetError();
   }

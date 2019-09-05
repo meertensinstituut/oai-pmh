@@ -241,9 +241,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ORDER BY `omeka_items`.`id`
                 LIMIT " . intval($stepSize) . "
                 ";
-//            $badIds = [125516];
 //            die($sql);
-//            error_log("DATA: current Id is: " . $currentId);
         } else {
             die("unknown metadataPrefix");
         }
