@@ -110,6 +110,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
     <ul class="quicklinks">
       <li><a href="?verb=Identify">Identify</a> | </li>
       <li><a href="?verb=ListRecords&amp;metadataPrefix=oai_dc">ListRecords</a> | </li>
+      <li><a href="?verb=ListRecords&amp;metadataPrefix=isebel">ListRecords for ISEBEL</a> | </li>
       <li><a href="?verb=ListSets">ListSets</a> | </li>
       <li><a href="?verb=ListMetadataFormats">ListMetadataFormats</a> | </li>
       <li>
