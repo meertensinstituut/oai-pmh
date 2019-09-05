@@ -322,18 +322,21 @@ class Server
             }
 
             // use last record id as the new cursor
+            $hasMoreRecords = true;
             if (get_class($dataProviderObject) == "DataProviderObject\Records") {
                 $currentRecords = $dataProviderObject->getRecords();
                 $lastRecord = end($currentRecords);
                 if ($lastRecord) {
                     $currentId = intval($lastRecord->getIdentifier());
                     $dataProviderObject->setCurrentId($currentId);
+                } else {
+                    $hasMoreRecords = false;
                 }
 //            error_log("SERVER: current Id is: " . $currentId);
             }
 
             // // resumptionToken
-            if ($resumptionToken != null || $dataProviderObject->needResumption()) {
+            if (($resumptionToken != null || $dataProviderObject->needResumption()) && $hasMoreRecords) {
                 $response->appendChild($this->createResumptionToken($dataProviderObject));
             }
 
