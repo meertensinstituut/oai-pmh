@@ -43,7 +43,7 @@ class MetadataFormatIsebel extends MetadataFormat
                 if ($data->variableSet("id")) {
                     $value = $data->get("id");
                     if (is_string($value)) {
-                        $metadata->appendChild($this->createAttribute($dom, "xml:id", $value));
+                        $metadata->appendChild($this->createAttribute($dom, "xml:id", "nl.verhalenbank." .$value));
                         $metadata->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
                         $this->createItem($dom, "dc:identifier", "nl.verhalenbank." . $value, null, $metadata);
                         $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":purl", $data->get("url"), null, $metadata);
@@ -156,6 +156,8 @@ class MetadataFormatIsebel extends MetadataFormat
                     }
                     $geoLocation->appendChild($geoLocationPoint);
                 }
+
+                $this->createItem($dom, "isebel:role", "narration", null, $geoLocation);
                 $geo->appendChild($geoLocation);
 
             }
