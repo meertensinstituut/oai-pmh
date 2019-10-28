@@ -157,6 +157,8 @@ class MetadataFormatIsebel extends MetadataFormat
                 $geoLocation->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
                 if (isset($value[1]) && $value[1] != null && is_string($value[1]) && trim($value[1]) != "") {
                     $this->createItem($dom, "dc:title", $value[1], array(array("xml:lang", "nl")), $geoLocation);
+                } else {
+                    $this->createItem($dom, "dc:title", 'No Name', array(array("xml:lang", "nl")), $geoLocation);
                 }
 
                 if (isset($value[2]) || isset($value[3])) {
