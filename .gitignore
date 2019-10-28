@@ -11,3 +11,5 @@ db/
 /nbproject/private/
 .idea/
 .idea/*
+web/src/data.php
+web/src/data.csv

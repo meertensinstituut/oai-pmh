@@ -99,7 +99,6 @@ abstract class DataProviderMysql extends DataProvider {
       }
     }
     if (! $listRecords->error ()) {
-//        die($listRecords->getCurrentId());
       $query = $this->createQuery ( $this->getRecordsListSql ( $listRecords->getCursor (), $listRecords->getStepSize (), $listRecords->getMetadataPrefix (), $listRecords->getSet (), $listRecords->getFrom (), $listRecords->getUntil (), $listRecords->getCurrentId() ) );
       if ($query->execute ()) {
         foreach ( $query->fetchAll ( \PDO::FETCH_ASSOC ) as $recordData ) {
