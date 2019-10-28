@@ -329,7 +329,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
-                  GROUP_CONCAT(DISTINCT(`isebel_date`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "date`,
+                  LEFT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "date`,
+                  RIGHT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "thro`,
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
@@ -369,7 +370,6 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
                 WHERE `omeka_items`.`id` = :identifier
-                GROUP BY `omeka_items`.`id`    
                 ";
 //            die($sql);
         } else {
