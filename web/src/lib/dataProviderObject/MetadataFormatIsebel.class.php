@@ -161,15 +161,27 @@ class MetadataFormatIsebel extends MetadataFormat
                 } else {
                     $this->createItem($dom, "dc:title", 'No Name', array(array("xml:lang", "nl")), $geoLocation);
                 }
-
-                if (isset($value[2]) || isset($value[3])) {
+                if (isset($value[2]) && isset($value[3]) && is_string($value[2]) && is_string($value[3]) && trim($value[2]) != '' && trim($value[3] != '')) {
                     $geoLocationPoint = $dom->createElement("isebel:point");
-                    if (isset($value[2]) && $value[2] != null && is_string($value[2]) && trim($value[2]) != "") {
-                        $this->createItem($dom, "datacite:pointLatitude", $value[2], null, $geoLocationPoint);
+                    if (isset($value[2]) && $value[2] != null && is_string($value[2])) {
+                        if ($value[2] == '0') {
+                            $this->createItem($dom, "datacite:pointLatitude", '0.0', null, $geoLocationPoint);
+                        } else {
+                            $this->createItem($dom, "datacite:pointLatitude", $value[2], null, $geoLocationPoint);
+                        }
+                    } else {
+                        $this->createItem($dom, "datacite:pointLatitude", '0.0', null, $geoLocationPoint);
                     }
-                    if (isset($value[3]) && $value[3] != null && is_string($value[3]) && trim($value[3]) != "") {
-                        $this->createItem($dom, "datacite:pointLongitude", $value[3], null, $geoLocationPoint);
+                    if (isset($value[3]) && $value[3] != null && is_string($value[3])) {
+                        if ($value[3] == '0') {
+                            $this->createItem($dom, "datacite:pointLongitude", '0.0', null, $geoLocationPoint);
+                        } else {
+                            $this->createItem($dom, "datacite:pointLongitude", $value[3], null, $geoLocationPoint);
+                        }
+                    } else {
+                        $this->createItem($dom, "datacite:pointLongitude", '0.0', null, $geoLocationPoint);
                     }
+
                     $geoLocation->appendChild($geoLocationPoint);
                 }
 
