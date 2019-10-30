@@ -240,7 +240,6 @@ class MetadataFormatIsebel extends MetadataFormat
 
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":name", $value[0], null, $person);
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $value[1], null, $person);
-//                die("value is: ". var_dump($value));
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":role", "narrator", null, $person);
 
                 $persons->appendChild($person);
@@ -250,21 +249,25 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
-    private function is_date($dateString) {
-        return DateTime::createFromFormat('Y-m-d', $dateString);
+    private function is_date($dateString, $format = 'Y-m-d')
+    {
+        $d = DateTime::createFromFormat($format, $dateString);
+        return $d && $d->format($format) === $dateString;
     }
 
     private function createEventItem($dom, $name, $value, $value2, $role, $metadata, $mainRequest = true)
     {
-        if ($value && $this->is_date($value)) {
+        if (($value && $this->is_date($value)) || ($value2 &&  $this->is_date($value2))) {
             if ($mainRequest) {
                 $persons = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":events");
                 $this->createEventItem($dom, $name, $value, $value2, $role, $persons, false);
                 $metadata->appendChild($persons);
             } else {
                 $event = $dom->createElement($name);
-                $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":date", $value, null, $event);
 
+                if ($value && $this->is_date($value)) {
+                    $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":date", $value, null, $event);
+                }
                 if ($value2 && $this->is_date($value2)) {
                     $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":thru", $value2, null, $event);
                 }
