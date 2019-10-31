@@ -58,7 +58,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         $this->createPersonItem($dom, $data->get("narrator"), $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), $data->get("thro"), "narration", $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":keywords");
-                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":imageResource", $data->get("resources"), $this->prepareAttribute( "id", $this->getIdFromUrlAsArray($data->get("resources")), $value), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":imageResources");
+                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":imageResource", $data->get("resources"), $this->prepareAttribute( "id", $this->getIdFromUrlAsArray($data->get("resources"))), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":imageResources");
                     } else {
                         die("no unique id story");
                     }
@@ -75,7 +75,7 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
-    private function prepareAttribute($key, $values, $id)
+    private function prepareAttribute($key, $values)
     {
 
         if (is_null($values)) {
