@@ -53,12 +53,12 @@ class MetadataFormatIsebel extends MetadataFormat
                         $this->createItem($dom, "dc:type", $data->get("subgenre"), array(array("xml:lang", "nl")), $metadata);
                         /* ttt stands for tale type text */
                         $this->createTaleTypeItem($dom, $data->get("ttt"), $metadata);
-                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = $this->clearString($data->get('text')) , array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
+                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = $this->clearString($data->get('text')), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
                         $this->createGeoItem($dom, $data->get("location"), $metadata);
                         $this->createPersonItem($dom, $data->get("narrator"), $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), $data->get("thro"), "narration", $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":keywords");
-
+                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":imageResource", $data->get("resources"), $this->prepareAttribute( "id", $this->getIdFromUrlAsArray($data->get("resources")), $value), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":imageResources");
                     } else {
                         die("no unique id story");
                     }
@@ -75,6 +75,52 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
+    private function prepareAttribute($key, $values, $id)
+    {
+
+        if (is_null($values)) {
+            return null;
+        }
+
+        if (is_array($values)) {
+            if ($this->isValidString($key)) {
+                $result = array();
+                foreach ($values as $value) {
+                    array_push($result, array($key, $value));
+                }
+//                if ($id == '8610') {
+//                    print('<pre>');
+//                    print_r($result);
+//                    die();
+//                }
+                return $result;
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    private function getIdFromUrlAsArray($urls)
+    {
+        if ($urls) {
+            if (is_string($urls)) {
+                $result = explode("/", $urls);
+                $result = end($result);
+                return array($result);
+            } elseif (is_array($urls)) {
+                $result = array();
+                foreach ($urls as $i) {
+                    array_push($result, $i);
+                }
+                return $result;
+            } else {
+                die("Attributes invalid");
+            }
+        }
+        return null;
+    }
+
     /*
      * This function clears the string according to the regular expression given
      *
@@ -84,13 +130,21 @@ class MetadataFormatIsebel extends MetadataFormat
      * @return string *cleared string*
      *
      */
-    private function clearString($orgString, $format='/[\x00-\x1F\x7F]/u') {
+    private function clearString($orgString, $format = '/[\x00-\x1F\x7F]/u')
+    {
         return preg_replace($format, '', $orgString);
     }
 
     private function createAttribute($dom, $name, $value)
     {
-        $attribute = $dom->createAttribute($name);
+        try {
+
+            $attribute = $dom->createAttribute($name);
+        } catch (\Exception $ex) {
+            print("name is [${name}]; value is [${value}]");
+            print($ex->getMessage());
+            die();
+        }
         $attribute->appendChild($dom->createTextNode($value));
         return $attribute;
     }
@@ -103,7 +157,11 @@ class MetadataFormatIsebel extends MetadataFormat
                 $item->appendChild($dom->createTextNode($value));
                 if ($attributes && is_array($attributes)) {
                     foreach ($attributes AS $attribute) {
-                        $item->appendChild($this->createAttribute($dom, $attribute[0], $attribute[1]));
+                        try {
+                            $item->appendChild($this->createAttribute($dom, $attribute[0], $attribute[1]));
+                        } catch (\Exception $ex) {
+                            die($ex);
+                        }
                     }
                 }
                 $metadata->appendChild($item);
@@ -117,7 +175,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
     private function createItemGroup($dom, $name, $value, $attributes, $metadata, $mainName)
     {
-        if ($value && $metadata) {
+        if ($value && $metadata && $mainName) {
             $mainItem = $dom->createElement($mainName);
             $this->createItem($dom, $name, $value, $attributes, $mainItem);
             $metadata->appendChild($mainItem);
@@ -303,6 +361,5 @@ class MetadataFormatIsebel extends MetadataFormat
             }
         }
     }
-
 
 }

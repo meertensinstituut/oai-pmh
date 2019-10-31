@@ -14,6 +14,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     const SPLIT_CHARACTER2 = "|*|*|*|*|*|";
     const PREFIX_HEADER = "header.";
     const PREFIX_METADATA = "metadata.";
+    const ITEMURL = 'http://www.verhalenbank.nl/items/show/';
+    const FILEURL = 'http://www.verhalenbank.nl/files/show/';
 
 
     public function listMetadataFormats($identifier = null)
@@ -191,7 +193,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   'story' AS `" . self::PREFIX_METADATA . "type`,
                   `isebel_type`.`text` AS `" . self::PREFIX_METADATA . "subgenre`,
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
-                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
+                  CONCAT('" . self::ITEMURL . "', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   LEFT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "date`,
@@ -200,11 +202,12 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
                   IF(GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator_gender_text`.`text`)) SEPARATOR '') in ('m', 'v'),
-                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', `isebel_narrator_gender_text`.`text`))
-                       SEPARATOR '|-|-|-|-|-|'),
-                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', ''))
-                       SEPARATOR '|-|-|-|-|-|')
-                    ) AS `metadata.narrator`
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '" . self::SPLIT_CHARACTER2 . "', `isebel_narrator_gender_text`.`text`))
+                       SEPARATOR '" . self::SPLIT_CHARACTER1 . "'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '" . self::SPLIT_CHARACTER2 . "', ''))
+                       SEPARATOR '" . self::SPLIT_CHARACTER1 . "')
+                    ) AS `metadata.narrator`, 
+                  GROUP_CONCAT(DISTINCT(CONCAT('" . self::FILEURL . "', `isebel_files`.`id`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "resources`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -234,6 +237,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ON `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
+                LEFT JOIN `omeka_files` AS `isebel_files`
+                ON `isebel_files`.`item_id` = `omeka_items`.`id`
                 WHERE (" . implode(") AND (", $conditions) . ") 
                 AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 AND `isebel_type`.`text` = 'sage'     
@@ -326,7 +331,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   'story' AS `" . self::PREFIX_METADATA . "type`,
                   `isebel_type`.`text` AS `" . self::PREFIX_METADATA . "subgenre`,
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
-                  CONCAT('http://www.verhalenbank.nl/items/show/', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
+                  CONCAT('" . self::ITEMURL . "', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
                   GROUP_CONCAT(DISTINCT(`isebel_identifier`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "identifier`,
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   LEFT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "date`,
@@ -335,11 +340,12 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
                   IF(GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator_gender_text`.`text`)) SEPARATOR '') in ('m', 'v'),
-                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', `isebel_narrator_gender_text`.`text`))
-                       SEPARATOR '|-|-|-|-|-|'),
-                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '|*|*|*|*|*|', ''))
-                       SEPARATOR '|-|-|-|-|-|')
-                    ) AS `metadata.narrator`
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '" . self::SPLIT_CHARACTER2 . "', `isebel_narrator_gender_text`.`text`))
+                       SEPARATOR '" . self::SPLIT_CHARACTER1 . "'),
+                    GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator`.`text`, '" . self::SPLIT_CHARACTER2 . "', ''))
+                       SEPARATOR '" . self::SPLIT_CHARACTER1 . "')
+                    ) AS `metadata.narrator`, 
+                  GROUP_CONCAT(DISTINCT(CONCAT('" . self::FILEURL . "', `isebel_files`.`id`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "resources`
                 FROM `omeka_items`
                 LEFT JOIN `omeka_collections`
                 ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
@@ -369,6 +375,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ON `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
+                LEFT JOIN `omeka_files` AS `isebel_files`
+                ON `isebel_files`.`item_id` = `omeka_items`.`id`
                 WHERE `omeka_items`.`id` = :identifier
                 ";
 //            die($sql);
