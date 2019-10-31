@@ -1,4 +1,5 @@
 <?php
+
 namespace DataProviderObject;
 
 use DateTime;
@@ -43,7 +44,7 @@ class MetadataFormatIsebel extends MetadataFormat
                 $metadata->appendChild($this->createAttribute($dom, "xsi:schemaLocation", MetadataFormatIsebel::METADATANAMESPACE . " " . MetadataFormatIsebel::SCHEMA));
                 if ($data->variableSet("id")) {
                     $value = $data->get("id");
-                    if (is_string($value)) {
+                    if ($this->isValidString($value)) {
                         $metadata->appendChild($this->createAttribute($dom, "xml:id", "nl.verhalenbank." . $value));
                         $metadata->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
                         $this->createItem($dom, "dc:identifier", "nl.verhalenbank." . $value, null, $metadata);
@@ -51,7 +52,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         $this->createItem($dom, "dc:type", $data->get("subgenre"), array(array("xml:lang", "nl")), $metadata);
                         /* ttt stands for tale type text */
                         $this->createTaleTypeItem($dom, $data->get("ttt"), $metadata);
-                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = preg_replace('/[\x00-\x1F\x7F]/u', '', $data->get("text")), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
+                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":content", $string = $this->clearString($data->get('text')) , array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":contents", "mainattributes", "mainmetadata");
                         $this->createGeoItem($dom, $data->get("location"), $metadata);
                         $this->createPersonItem($dom, $data->get("narrator"), $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), $data->get("thro"), "narration", $metadata);
@@ -73,6 +74,19 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
+    /*
+     * This function clears the string according to the regular expression given
+     *
+     * @param string $orgString *The original string to be cleared*
+     * @param string $format *Default set to remove control characters*
+     *
+     * @return string *cleared string*
+     *
+     */
+    private function clearString($orgString, $format='/[\x00-\x1F\x7F]/u') {
+        return preg_replace($format, '', $orgString);
+    }
+
     private function createAttribute($dom, $name, $value)
     {
         $attribute = $dom->createAttribute($name);
@@ -83,7 +97,7 @@ class MetadataFormatIsebel extends MetadataFormat
     private function createItem($dom, $name, $value, $attributes, $metadata)
     {
         if ($value && $metadata) {
-            if (is_string($value)) {
+            if ($this->isValidString($value)) {
                 $item = $dom->createElement($name);
                 $item->appendChild($dom->createTextNode($value));
                 if ($attributes && is_array($attributes)) {
@@ -100,40 +114,52 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
-    private function createKeywords($dom, $name, $value, $attributes, $metadata, $mainName, $mainAttributes = null, $mainMetadata = null) {
+    private function createItemGroup($dom, $name, $value, $attributes, $metadata, $mainName)
+    {
+        if ($value && $metadata) {
+            $mainItem = $dom->createElement($mainName);
+            $this->createItem($dom, $name, $value, $attributes, $mainItem);
+            $metadata->appendChild($mainItem);
+        }
+    }
 
-        if (is_string($value)) {
+    /*
+     * This function creates keywords and it's subtype keyword in XML of an ISEBEL story
+     *
+     * @param Dom $dom *the root dom*
+     * @param string $name *Name of current main element, tag name or name of the sub element*
+     * @param string || array $value *The content of the the current tag. The keywords (in case of array
+     * or the keyword (in case of string)*
+     * @param string || array $attributes *Attributes of the tag*
+     * @param Node $metadata *Parent node of the current node*
+     * @param string $mainName *The container of the current elements, in this case, it is <keywords/> and the
+     * sub elements will be <keyword/>
+     *
+     * @return void
+     */
+    private function createKeywords($dom, $name, $value, $attributes, $metadata, $mainName)
+    {
+        // TODO: split words using space
+        if ($this->isValidString($value)) {
             // explode the $value into new array
         } elseif (is_array($value)) {
             // expload every $value into new array
         }
-
         $this->createItemGroup($dom, $name, $value, $attributes, $metadata, $mainName);
-
     }
 
-    private function createItemGroup($dom, $name, $value, $attributes, $metadata, $mainName, $mainAttributes = null, $mainMetadata = null)
+    /*
+     * This function checks whether a given string is a valid, non empty string
+     * The non empty check can be turned on or off using the second parameter
+     *
+     * @param string $testString *The string to be tested*
+     * @param boolean $emptyString *Default set to false, which means the string cannot be empty ('')
+     *
+     * @return boolean
+     */
+    private function isValidString($testString, $emptyString = false)
     {
-        if ($value && $metadata) {
-            $mainItem = $dom->createElement($mainName);
-
-            if (is_string($value)) {
-                $item = $dom->createElement($name);
-                $item->appendChild($dom->createTextNode($value));
-                if ($attributes && is_array($attributes)) {
-                    foreach ($attributes AS $attribute) {
-                        $item->appendChild($this->createAttribute($dom, $attribute[0], $attribute[1]));
-                    }
-                }
-                $mainItem->appendChild($item);
-            } else if (is_array($value)) {
-                foreach ($value AS $subValue) {
-                    $this->createItem($dom, $name, $subValue, $attributes, $mainItem);
-                }
-            }
-
-            $metadata->appendChild($mainItem);
-        }
+        return $emptyString ? isset($testString) && !is_null($testString) && is_string($testString) : isset($testString) && !is_null($testString) && is_string($testString) && trim($testString) != '';
     }
 
     private function createGeoItem($dom, $value, $metadata, $mainRequest = true)
@@ -156,31 +182,18 @@ class MetadataFormatIsebel extends MetadataFormat
                 $geoLocation->appendChild($this->createAttribute($dom, "id", "geo" . $value[0]));
 
                 $geoLocation->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
-                if (isset($value[1]) && $value[1] != null && is_string($value[1]) && trim($value[1]) != "") {
+                if ($this->isValidString($value[1])) {
                     $this->createItem($dom, "dc:title", $value[1], array(array("xml:lang", "nl")), $geoLocation);
                 } else {
                     $this->createItem($dom, "dc:title", 'No Name', array(array("xml:lang", "nl")), $geoLocation);
                 }
-                if (isset($value[2]) && isset($value[3]) && is_string($value[2]) && is_string($value[3]) && trim($value[2]) != '' && trim($value[3] != '')) {
+                if ($this->isValidString($value[2]) && $this->isValidString($value[3])) {
                     $geoLocationPoint = $dom->createElement("isebel:point");
-                    if (isset($value[2]) && $value[2] != null && is_string($value[2])) {
-                        if ($value[2] == '0') {
-                            $this->createItem($dom, "datacite:pointLatitude", '0.0', null, $geoLocationPoint);
-                        } else {
-                            $this->createItem($dom, "datacite:pointLatitude", $value[2], null, $geoLocationPoint);
-                        }
-                    } else {
-                        $this->createItem($dom, "datacite:pointLatitude", '0.0', null, $geoLocationPoint);
-                    }
-                    if (isset($value[3]) && $value[3] != null && is_string($value[3])) {
-                        if ($value[3] == '0') {
-                            $this->createItem($dom, "datacite:pointLongitude", '0.0', null, $geoLocationPoint);
-                        } else {
-                            $this->createItem($dom, "datacite:pointLongitude", $value[3], null, $geoLocationPoint);
-                        }
-                    } else {
-                        $this->createItem($dom, "datacite:pointLongitude", '0.0', null, $geoLocationPoint);
-                    }
+                    if ($value[2] == '0') $value[2] = '0.0';
+                    $this->createItem($dom, "datacite:pointLatitude", $value[2], null, $geoLocationPoint);
+
+                    if ($value[3] == '0') $value[3] = '0.0';
+                    $this->createItem($dom, "datacite:pointLongitude", $value[3], null, $geoLocationPoint);
 
                     $geoLocation->appendChild($geoLocationPoint);
                 }
@@ -249,15 +262,27 @@ class MetadataFormatIsebel extends MetadataFormat
         }
     }
 
+    /*
+     * Check the given string is a valid date according to the format specified.
+     * The function checks not only if the string conforms to the format but also whether it is indeed a valid date.
+     *
+     * @param string $dataString *The string to be checked*
+     * @param string $format *The format of the date*
+     *
+     * @return boolean
+     */
     private function is_date($dateString, $format = 'Y-m-d')
     {
-        $d = DateTime::createFromFormat($format, $dateString);
-        return $d && $d->format($format) === $dateString;
+        if ($this->isValidString($dateString)) {
+            $d = DateTime::createFromFormat($format, $dateString);
+            return $d && $d->format($format) === $dateString;
+        }
+        return false;
     }
 
     private function createEventItem($dom, $name, $value, $value2, $role, $metadata, $mainRequest = true)
     {
-        if (($value && $this->is_date($value)) || ($value2 &&  $this->is_date($value2))) {
+        if (($value && $this->is_date($value)) || ($value2 && $this->is_date($value2))) {
             if ($mainRequest) {
                 $persons = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":events");
                 $this->createEventItem($dom, $name, $value, $value2, $role, $persons, false);
