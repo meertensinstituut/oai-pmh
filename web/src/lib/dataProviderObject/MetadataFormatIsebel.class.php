@@ -22,6 +22,7 @@ class MetadataFormatIsebel extends MetadataFormat
         "keyWord",
         "subgenre"
     );
+    const UNKNOWN = 'No name';
 
     public function __construct()
     {
@@ -185,7 +186,7 @@ class MetadataFormatIsebel extends MetadataFormat
                 if ($this->isValidString($value[1])) {
                     $this->createItem($dom, "dc:title", $value[1], array(array("xml:lang", "nl")), $geoLocation);
                 } else {
-                    $this->createItem($dom, "dc:title", 'No Name', array(array("xml:lang", "nl")), $geoLocation);
+                    $this->createItem($dom, "dc:title", self::UNKNOWN, array(array("xml:lang", "nl")), $geoLocation);
                 }
                 if ($this->isValidString($value[2]) && $this->isValidString($value[3])) {
                     $geoLocationPoint = $dom->createElement("isebel:point");
