@@ -58,7 +58,7 @@ class MetadataFormatIsebel extends MetadataFormat
                         $this->createPersonItem($dom, $data->get("narrator"), $metadata);
                         $this->createEventItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":event", $data->get("date"), $data->get("thro"), "narration", $metadata);
                         $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":keyword", $data->get("keyword"), array(array("xml:lang", "nl")), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":keywords");
-                        $this->createItemGroup($dom, MetadataFormatIsebel::METADATAPREFIX . ":imageResource", $data->get("resources"), $this->prepareAttribute( "id", $this->getIdFromUrlAsArray($data->get("resources"))), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":imageResources");
+                        $this->createImageResources($dom, MetadataFormatIsebel::METADATAPREFIX . ":imageResource", $data->get("resources"), $this->prepareAttribute( "id", $this->getIdFromUrlAsArray($data->get("resources"))), $metadata, MetadataFormatIsebel::METADATAPREFIX . ":imageResources");
                     } else {
                         die("no unique id story");
                     }
@@ -111,7 +111,8 @@ class MetadataFormatIsebel extends MetadataFormat
             } elseif (is_array($urls)) {
                 $result = array();
                 foreach ($urls as $i) {
-                    array_push($result, $i);
+                    $tmp = explode("/", $i);
+                    array_push($result, end($tmp));
                 }
                 return $result;
             } else {
@@ -154,6 +155,7 @@ class MetadataFormatIsebel extends MetadataFormat
         if ($value && $metadata) {
             if ($this->isValidString($value)) {
                 $item = $dom->createElement($name);
+
                 $item->appendChild($dom->createTextNode($value));
                 if ($attributes && is_array($attributes)) {
                     foreach ($attributes AS $attribute) {
@@ -178,6 +180,34 @@ class MetadataFormatIsebel extends MetadataFormat
         if ($value && $metadata && $mainName) {
             $mainItem = $dom->createElement($mainName);
             $this->createItem($dom, $name, $value, $attributes, $mainItem);
+            $metadata->appendChild($mainItem);
+        }
+    }
+
+    private function createImageResource($dom, $name, $value, $attributes, $metadata, $mainName)
+    {
+        if ($value && $metadata && $mainName) {
+            $mainItem = $dom->createElement($mainName);
+            $mainItem->appendChild($this->createAttribute($dom, $attributes[0], $attributes[1]));
+            $this->createItem($dom, $name, $value, null, $mainItem);
+            $metadata->appendChild($mainItem);
+        }
+    }
+
+    private function createImageResources($dom, $name, $value, $attributes, $metadata, $mainName)
+    {
+        if ($value && $metadata && $mainName) {
+            $mainItem = $dom->createElement($mainName);
+            if ($this->isValidString($value)) {
+                foreach ($attributes as $attribute) {
+                    $this->createImageResource($dom, MetadataFormatIsebel::METADATAPREFIX . ":purl", $value, $attribute, $mainItem, $name);
+                }
+            } elseif (is_array($value)) {
+                for ($i = 0; $i < count($value); $i++) {
+                    $this->createImageResource($dom, MetadataFormatIsebel::METADATAPREFIX . ":purl", $value[$i], $attributes[$i], $mainItem, $name);
+                }
+            }
+
             $metadata->appendChild($mainItem);
         }
     }
