@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   web:
+    restart: always
     container_name: web
     build: ./web
     ports:
@@ -11,6 +12,7 @@ services:
     volumes:
       - ./web/src:/var/www/html
   db-oaipmh:
+    restart: always
     container_name: db-oaipmh
     image: mariadb:latest
     ports:
@@ -23,6 +25,7 @@ services:
       - MYSQL_USER=demo
       - MYSQL_PASSWORD=demo
   phpmyadmin:
+    restart: always
     container_name: phpmyadmin
     image: 'phpmyadmin/phpmyadmin'
     ports:
