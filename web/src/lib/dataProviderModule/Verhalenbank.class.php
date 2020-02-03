@@ -191,6 +191,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
                   `omeka_items`.`collection_id` AS `" . self::PREFIX_HEADER . "setSpec`,
                   'story' AS `" . self::PREFIX_METADATA . "type`,
+                  `isebel_language`.`text` AS `" . self::PREFIX_METADATA . "isebel_language`,
                   `isebel_type`.`text` AS `" . self::PREFIX_METADATA . "subgenre`,
                   `omeka_items`.`id` AS `" . self::PREFIX_METADATA . "id`,                     
                   CONCAT('" . self::ITEMURL . "', `omeka_items`.`id`) AS `" . self::PREFIX_METADATA . "url`,
@@ -217,6 +218,8 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 ON `isebel_text`.`record_type` = 'Item' AND `isebel_text`.`record_id` = `omeka_items`.`id` AND `isebel_text`.`element_id` = 1
                 LEFT JOIN `omeka_element_texts` AS `isebel_type`
                 ON `isebel_type`.`record_type` = 'Item' AND `isebel_type`.`record_id` = `omeka_items`.`id` AND `isebel_type`.`element_id` = 58
+                LEFT JOIN `omeka_element_texts` AS `isebel_language`
+                ON `isebel_language`.`record_type` = 'Item' AND `isebel_language`.`record_id` = `omeka_items`.`id` AND `isebel_language`.`element_id` = 44
                 LEFT JOIN `omeka_element_texts` AS `isebel_date`
                 ON `isebel_date`.`record_type` = 'Item' AND `isebel_date`.`record_id` = `omeka_items`.`id` AND `isebel_date`.`element_id` = 40
                 LEFT JOIN `omeka_locations` AS `isebel_location`
