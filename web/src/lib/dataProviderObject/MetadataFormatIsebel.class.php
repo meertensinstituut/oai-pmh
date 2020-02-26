@@ -131,7 +131,7 @@ class MetadataFormatIsebel extends MetadataFormat
      * @return string *cleared string*
      *
      */
-    private function clearString($orgString, $format = '/[\x00-\x1F\x7F]/u')
+    private function clearString($orgString, $format = '/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/u')
     {
         return preg_replace($format, '', $orgString);
     }
