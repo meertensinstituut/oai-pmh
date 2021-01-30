@@ -322,6 +322,10 @@ class MetadataFormatIsebel extends MetadataFormat
 
     private function createPersonItem($dom, $value, $metadata, $mainRequest = true)
     {
+        $genderArray = array(
+            "m" => "male",
+            "v" => "female"
+        );
 
         if ($value && is_array($value) && count($value) > 0) {
             if (is_array($value[0])) {
@@ -339,9 +343,12 @@ class MetadataFormatIsebel extends MetadataFormat
                 }
                 $person = $dom->createElement(MetadataFormatIsebel::METADATAPREFIX . ":person");
                 $person->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
-
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":name", $value[0], null, $person);
-                $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $value[1], null, $person);
+                if (array_key_exists($value[1], $genderArray)) {
+                    $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $genderArray[$value[1]], null, $person);
+                } else {
+                    $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":gender", $value[1], null, $person);
+                }
                 $this->createItem($dom, MetadataFormatIsebel::METADATAPREFIX . ":role", "narrator", null, $person);
 
                 $persons->appendChild($person);
