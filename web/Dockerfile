@@ -1,21 +1,8 @@
-FROM ubuntu:16.04
+FROM registry.huc.knaw.nl/dockerhubproxy/library/php:7.3-apache
 
-USER root
-WORKDIR "/root"
-
-RUN apt-get update && apt-get install -y  mariadb-client php-mysql php-mysqli locales net-tools vim software-properties-common unzip apache2 php php-mysqli php-curl php-sqlite3 php-xml libapache2-mod-php && \
-    locale-gen en_US.UTF-8 en_US && update-locale LANG=en_US.UTF-8 LANGUAGE=en_US:en
-    
-RUN service apache2 stop && \
-    sed -i 's/display_errors = Off/display_errors = On/g' /etc/php/7.0/apache2/php.ini && \
-    echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && \
-    a2enconf fqdn && \
-    rm -rf /var/www/html/* && \
-    chmod -R 755 /var/www/html 
-       
-# RUN printf "#!/bin/bash\nservice mysql start\nservice apache2 start\ntail -f /dev/null\necho \"okokok\"" >> /start.sh
-RUN printf "#!/bin/bash\nservice apache2 start\ntail -f /dev/null\necho \"okokok\"" >> /start.sh
-RUN cat /start.sh
-RUN chmod 755 /start.sh
-ENTRYPOINT ["/start.sh"]
-
+RUN apt-get update && apt-get install -y locales net-tools vim unzip mariadb-client gettext
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen
+RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+COPY src /var/www/html
+RUN chown -R www-data.www-data /var/www/html

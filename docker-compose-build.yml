@@ -2,10 +2,35 @@ version: '3.4'
 
 services:
   web:
-    restart: unless-stopped
+    restart: always
     container_name: web
     build: ./web
     ports:
       - "8000:80"
+    depends_on:
+      - db-oaipmh
+  db-oaipmh:
+    restart: always
+    container_name: db-oaipmh
+    image: mariadb:latest
+    ports:
+      - 3306:3306
     volumes:
-      - ./web/src:/var/www/html
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=oai-pmh
+      - MYSQL_USER=demo
+      - MYSQL_PASSWORD=demo
+  phpmyadmin:
+    restart: always
+    container_name: phpmyadmin
+    image: 'phpmyadmin/phpmyadmin'
+    ports:
+      - 8080:80
+    depends_on:
+      - db-oaipmh
+    environment:
+      - MYSQL_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=root
+      - PMA_HOST=db-oaipmh
