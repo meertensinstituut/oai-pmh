@@ -1,9 +1,15 @@
 version: '3.4'
 
+networks:
+  solrcloud:
+    external: true
+
 services:
   isebel-oai-pmh:
-    restart: always
+    restart: unless-stopped
+    image: isebel-oai-pmh:latest
     container_name: isebel-oai-pmh
-    image: registry.huc.knaw.nl/vicd/oai-pmh_web
     ports:
-      - "8000:80"
+        - "38999:80"
+    networks:
+      - solrcloud

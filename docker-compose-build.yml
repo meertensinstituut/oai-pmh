@@ -2,7 +2,6 @@ version: '3.4'
 
 services:
   web:
-    restart: always
     container_name: web
     build: ./web
     ports:
@@ -10,20 +9,16 @@ services:
     depends_on:
       - db-oaipmh
   db-oaipmh:
-    restart: always
     container_name: db-oaipmh
     image: mariadb:latest
-    ports:
-      - 3306:3306
     volumes:
       - ./db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=oai-pmh
+      - MYSQL_DATABASE=verhalenbank_omeka
       - MYSQL_USER=demo
       - MYSQL_PASSWORD=demo
   phpmyadmin:
-    restart: always
     container_name: phpmyadmin
     image: 'phpmyadmin/phpmyadmin'
     ports:
