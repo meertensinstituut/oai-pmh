@@ -45,7 +45,7 @@ class MetadataFormatIsebel extends MetadataFormat
                 $metadata->appendChild($this->createAttribute($dom, "xsi:schemaLocation", MetadataFormatIsebel::METADATANAMESPACE . " " . MetadataFormatIsebel::SCHEMA));
                 if ($data->variableSet("id")) {
                     $value = $data->get("id");
-                    if ($this->isValidString($value)) {
+                    if (!empty($value) && (is_string($value) || is_numeric($value))) {
                         $metadata->appendChild($this->createAttribute($dom, "xml:id", "nl.verhalenbank." . $value));
                         $metadata->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
                         $this->createItem($dom, "dc:identifier", "nl.verhalenbank." . $value, null, $metadata);
@@ -83,7 +83,7 @@ class MetadataFormatIsebel extends MetadataFormat
         }
 
         if (is_array($values)) {
-            if ($this->isValidString($key)) {
+            if ($this->stringNotEmpty($key)) {
                 $result = array();
                 foreach ($values as $value) {
                     array_push($result, array($key, $value));
@@ -153,7 +153,7 @@ class MetadataFormatIsebel extends MetadataFormat
     private function createItem($dom, $name, $value, $attributes, $metadata)
     {
         if ($value && $metadata) {
-            if ($this->isValidString($value)) {
+            if (!empty($value) && (is_numeric($value) || is_string($value))) {
                 $item = $dom->createElement($name);
 
                 $item->appendChild($dom->createTextNode($value));
@@ -198,7 +198,7 @@ class MetadataFormatIsebel extends MetadataFormat
     {
         if ($value && $metadata && $mainName) {
             $mainItem = $dom->createElement($mainName);
-            if ($this->isValidString($value)) {
+            if ($this->stringNotEmpty($value)) {
                 foreach ($attributes as $attribute) {
                     $this->createImageResource($dom, MetadataFormatIsebel::METADATAPREFIX . ":purl", $value, $attribute, $mainItem, $name);
                 }
@@ -246,9 +246,18 @@ class MetadataFormatIsebel extends MetadataFormat
      *
      * @return boolean
      */
-    private function isValidString($testString, $emptyString = false)
+//    private function isValidString($testString, $emptyString = false): bool
+//    {
+//        return $emptyString ? isset($testString) && is_string($testString) : isset($testString) && is_string($testString) && trim($testString) != '';
+//    }
+    private function stringNotEmpty($testString): bool
     {
-        return $emptyString ? isset($testString) && !is_null($testString) && is_string($testString) : isset($testString) && !is_null($testString) && is_string($testString) && trim($testString) != '';
+        return isset($testString) && is_string($testString) && trim($testString) != '';
+    }
+
+    private function filledStringNumber($testStringNumber): bool
+    {
+        return isset($testStringNumber) && (is_numeric($testStringNumber) || is_string($testStringNumber)) && trim($testStringNumber) != '';
     }
 
     private function createGeoItem($dom, $value, $metadata, $mainRequest = true)
@@ -271,12 +280,12 @@ class MetadataFormatIsebel extends MetadataFormat
                 $geoLocation->appendChild($this->createAttribute($dom, "id", "geo" . $value[0]));
 
                 $geoLocation->appendChild($this->createAttribute($dom, "xml:lang", "nl"));
-                if ($this->isValidString($value[1])) {
+                if (!empty($value[1]) && is_string($value[1])) {
                     $this->createItem($dom, "dc:title", $value[1], array(array("xml:lang", "nl")), $geoLocation);
                 } else {
                     $this->createItem($dom, "dc:title", self::UNKNOWN, array(array("xml:lang", "nl")), $geoLocation);
                 }
-                if ($this->isValidString($value[2]) && $this->isValidString($value[3])) {
+                if ($this->filledStringNumber($value[2]) && $this->filledStringNumber($value[3])) {
                     $geoLocationPoint = $dom->createElement("isebel:point");
                     if ($value[2] == '0') $value[2] = '0.0';
                     $this->createItem($dom, "datacite:pointLatitude", $value[2], null, $geoLocationPoint);
@@ -367,9 +376,9 @@ class MetadataFormatIsebel extends MetadataFormat
      *
      * @return boolean
      */
-    private function is_date($dateString, $format = 'Y-m-d')
+    private function is_date($dateString, $format = 'Y-m-d'): bool
     {
-        if ($this->isValidString($dateString)) {
+        if ($this->stringNotEmpty($dateString)) {
             $d = DateTime::createFromFormat($format, $dateString);
             return $d && $d->format($format) === $dateString;
         }
