@@ -9,7 +9,9 @@ services:
     restart: unless-stopped
     image: isebel-oai-pmh:v1-php8.1
     container_name: isebel-oai-pmh
+    volumes:
+      - ./web/src:/var/www/html
     ports:
-        - "38999:80"
+      - "38999:80"
     networks:
       - solrcloud
