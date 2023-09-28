@@ -11,7 +11,7 @@ class Header extends DataProviderObject {
   const HEADER_SETSPEC = "setSpec";
   public function __construct($data) {
     if (is_array ( $data )) {
-      if (isset ( $data [self::HEADER_IDENTIFIER] ) && ! is_null ( $data [self::HEADER_IDENTIFIER] ) && is_string ( $data [self::HEADER_IDENTIFIER] )) {
+      if (isset ( $data [self::HEADER_IDENTIFIER] ) && ! is_null ( $data [self::HEADER_IDENTIFIER] ) && (is_string ( $data [self::HEADER_IDENTIFIER] ) || is_numeric($data [self::HEADER_IDENTIFIER]) )) {
         $this->identifier = $data [self::HEADER_IDENTIFIER];
       } else {
         die ( "no " . self::HEADER_IDENTIFIER );
@@ -23,11 +23,11 @@ class Header extends DataProviderObject {
       }
       $this->setSpec = array ();
       if (isset ( $data [self::HEADER_SETSPEC] ) && ! is_null ( $data [self::HEADER_SETSPEC] )) {
-        if (is_string ( $data [self::HEADER_SETSPEC] )) {
+        if (is_string ( $data [self::HEADER_SETSPEC] ) || is_numeric ( $data [self::HEADER_SETSPEC] )) {
           $this->setSpec [] = $data [self::HEADER_SETSPEC];
         } else if (is_array ( $data [self::HEADER_SETSPEC] )) {
           foreach ( $data [self::HEADER_SETSPEC] as $setSpec ) {
-            if (is_string ( $setSpec )) {
+            if (is_string ( $setSpec ) || is_numeric ( $setSpec )) {
               $this->setSpec [] = $setSpec;
             } else {
               die ( "invalid " . self::HEADER_SETSPEC );
