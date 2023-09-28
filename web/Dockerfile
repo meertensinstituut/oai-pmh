@@ -1,4 +1,4 @@
-FROM registry.huc.knaw.nl/dockerhub/library/php:7.3-apache
+FROM registry.huc.knaw.nl/dockerhub/library/php:8.1-apache
 #FROM php:7.3-apache
 
 RUN apt-get update && apt-get install -y locales net-tools vim unzip mariadb-client gettext
