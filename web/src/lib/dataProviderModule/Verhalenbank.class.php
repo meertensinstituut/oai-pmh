@@ -30,7 +30,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     {
         list ($binds, $conditions) = $this->createItemsConditions();
         $sql = "SELECT 
-              UNIX_TIMESTAMP(MIN(`created`)) AS :fieldEarliestDatestamp 
+              UNIX_TIMESTAMP(MIN(`added`)) AS :fieldEarliestDatestamp 
               FROM `omeka_items`
               WHERE (" . implode(") AND (", $conditions) . ")
               ";
