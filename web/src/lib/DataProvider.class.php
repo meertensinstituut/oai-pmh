@@ -123,7 +123,7 @@ abstract class DataProvider {
     return $records;
   }
   public function getRecord($identifier, $metadataPrefix) {
-    $record = new \DataProviderObject\Record ( $identifier, $metadataPrefix );
+    $record = new \DataProviderObject\Record ();
     $record->setIdentifier ( $identifier );
     $listMetadataFormats = $this->listMetadataFormats ();
     if (! $listMetadataFormats->metadataPrefixAvailable ( $metadataPrefix )) {

@@ -37,13 +37,13 @@ class Record extends DataProviderObject
         return $this->metadata;
     }
 
-    public function setHeader($value)
+    public function setHeader($value): void
     {
-        if ($value !== null && $value instanceof Header) {
+        if ($value instanceof Header) {
             $this->header = $value;
             if ($this->identifier == null) {
                 $this->identifier = $this->header->getIdentifier();
-            } else if ($this->identifier !== $this->header->getIdentifier()) {
+            } else if ($this->identifier !== (string)$this->header->getIdentifier()) {
                 $this->setError(\OAIPMH\Server::ERROR_IDDOESNOTEXIST);
             }
         } else {
