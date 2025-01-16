@@ -199,7 +199,13 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                   GROUP_CONCAT(DISTINCT(`isebel_text`.`text`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "text`,
                   LEFT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "date`,
                   RIGHT(TRIM(BOTH from `isebel_date`.`text`), 10) AS `" . self::PREFIX_METADATA . "thro`,
-                  GROUP_CONCAT(DISTINCT(CONCAT(`isebel_location`.`id`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`locality`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`latitude`,'" . self::SPLIT_CHARACTER2 . "',`isebel_location`.`longitude`)) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "location`,
+                  GROUP_CONCAT(DISTINCT (
+                        CASE
+                            WHEN `isebel_location`.`map_type` IS NOT NULL AND `isebel_location`.`map_type` != ''
+                            THEN CONCAT(`isebel_location`.`id`, '|*|*|*|*|*|', `isebel_location`.`locality`, '|*|*|*|*|*|', `isebel_location`.`latitude`, '|*|*|*|*|*|', `isebel_location`.`longitude`)
+                            ELSE NULL
+                        END
+                  ) SEPARATOR '|-|-|-|-|-|') AS `metadata.location`,
                   GROUP_CONCAT(DISTINCT(`isebel_keyword`.`name`) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "keyword`, 
                   GROUP_CONCAT(DISTINCT(CONCAT(`isebel_taletypes`.`text`,'" . self::SPLIT_CHARACTER2 . "', `isebel_taletype_title_text`.`text` " . ")) SEPARATOR '" . self::SPLIT_CHARACTER1 . "') AS `" . self::PREFIX_METADATA . "ttt`, 
                   IF(GROUP_CONCAT(DISTINCT (CONCAT(`isebel_narrator_gender_text`.`text`)) SEPARATOR '') in ('m', 'v'),
@@ -245,7 +251,6 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 WHERE (" . implode(") AND (", $conditions) . ") 
                 AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 AND `isebel_type`.`text` = 'sage'     
-                AND `isebel_location`.`map_type` != ''
                 AND `omeka_items`.`id` > " . intval($currentId) . "
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
@@ -453,7 +458,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                     if (strpos($value, self::SPLIT_CHARACTER1) !== false) {
                         $items = explode(self::SPLIT_CHARACTER1, $value);
                         $filteredData [$match [1]] = array();
-                        foreach ($items AS $item) {
+                        foreach ($items as $item) {
                             if (strpos($item, self::SPLIT_CHARACTER2) !== false) {
                                 $filteredData [$match [1]][] = explode(self::SPLIT_CHARACTER2, $item);
                             } else {
@@ -479,7 +484,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     {
         $binds = array();
         $conditions = array();
-        $conditions [] = "`omeka_items`.`collection_id` in ( '1' )";
+        $conditions [] = "`omeka_items`.`collection_id` in ( '1', '12' )";
         $conditions [] = "`omeka_items`.`public`";
         $conditions [] = "NOT `omeka_items`.`featured`";
         if ($set !== null) {
