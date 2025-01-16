@@ -17,9 +17,9 @@ docker build -t isebel-oai-pmh .
 ```
 #### Run Docker Image
 There are 2 ways to run the docker image, dev and prod. 
-The dev mounts local folder to `/var/www/html` in the container while the prod runs totoally in the container. 
+The dev mounts local folder to `/var/www/html` in the container while the prod runs in the container. 
 
-```console
+```shell
 # prod
 docker compose up -d
 

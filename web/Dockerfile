@@ -1,5 +1,4 @@
-FROM registry.huc.knaw.nl/dockerhub/library/php:8.1-apache
-#FROM php:7.3-apache
+FROM php:8.1-apache
 
 RUN apt-get update && apt-get install -y locales net-tools vim unzip mariadb-client gettext
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen

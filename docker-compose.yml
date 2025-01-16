@@ -1,9 +1,3 @@
-version: '3.4'
-
-networks:
-  solrcloud:
-    external: true
-
 services:
   isebel-oai-pmh:
     restart: unless-stopped
@@ -12,4 +6,9 @@ services:
     ports:
         - "38999:80"
     networks:
-      - solrcloud
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
+

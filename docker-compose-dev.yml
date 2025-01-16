@@ -1,7 +1,5 @@
-version: '3.4'
-
 networks:
-  solrcloud:
+  traefik-public:
     external: true
 
 services:
@@ -14,4 +12,4 @@ services:
     ports:
       - "38999:80"
     networks:
-      - solrcloud
+      - traefik-public

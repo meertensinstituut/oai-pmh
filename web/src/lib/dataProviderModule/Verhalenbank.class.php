@@ -245,6 +245,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 WHERE (" . implode(") AND (", $conditions) . ") 
                 AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 AND `isebel_type`.`text` = 'sage'     
+                AND `isebel_location`.`map_type` != ''
                 AND `omeka_items`.`id` > " . intval($currentId) . "
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
