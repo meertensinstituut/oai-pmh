@@ -632,6 +632,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
     </div>
   </xsl:template>
 
+  <!-- ISEBEL record -->
+
+  <xsl:template match="isebel:story"
+                xmlns:isebel="http://www.isebel.eu/ns/isebel"
+                xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <h3>ISEBEL Metadata (isebel)</h3>
+    <table class="values">
+      <tr>
+        <td class="key">Resource Identifier</td>
+        <td class="value"><xsl:value-of select="dc:identifier"/></td>
+      </tr>
+      <tr>
+        <td class="key">Resource Link</td>
+        <td class="value"><xsl:value-of select="isebel:purl"/></td>
+      </tr>
+    </table>
+    <div class="xmlSource">
+      <xsl:apply-templates select="." mode="xmlMarkup"/>
+    </div>
+  </xsl:template>
+
   <!-- oai_dc record -->
 
   <xsl:template match="oai_dc:dc" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/">
