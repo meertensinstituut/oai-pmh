@@ -6,7 +6,8 @@ class Configuration {
   
   private $config;
   private $filename;
-  
+  private $configTimestamp;
+
   public function __construct($file) {
     $this->filename = $file;
     if (file_exists ( $file ) && is_readable ( $file )) {

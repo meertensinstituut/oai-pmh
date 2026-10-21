@@ -145,7 +145,7 @@ class MetadataFormatIsebel extends MetadataFormat
 
             $attribute = $dom->createAttribute($name);
         } catch (\Exception $ex) {
-            print("name is [${name}]; value is [${value}]");
+            print("name is [{$name}]; value is [{$value}]");
             print($ex->getMessage());
             die();
         }

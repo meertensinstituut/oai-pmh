@@ -5,6 +5,7 @@ namespace DataProviderObject;
 class Header extends DataProviderObject {
   private $identifier;
   private $datestamp;
+  private $setSpec;
   const HEADER = "header";
   const HEADER_IDENTIFIER = "identifier";
   const HEADER_DATESTAMP = "datestamp";
