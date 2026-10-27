@@ -86,12 +86,30 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     protected function getIdentifiersNumberSql($metadataPrefix, $set, $from, $until)
     {
         list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
+
+        $extraSql = "";
+        if ($metadataPrefix == MetadataFormatIsebel::METADATAPREFIX) {
+            $extraSql = "
+                JOIN `omeka_element_texts` AS `isebel_type`
+                ON `isebel_type`.`record_type` = 'Item' AND `isebel_type`.`record_id` = `omeka_items`.`id` AND `isebel_type`.`element_id` = 58
+                WHERE (" . implode(") AND (", $conditions) . ")
+                AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')
+                AND `isebel_type`.`text` = 'sage'
+                AND `omeka_items`.`item_type_id` = 18
+            ";
+        } else {
+            $extraSql = "
+                WHERE (" . implode(") AND (", $conditions) . ")
+            ";
+        }
+
         $sql = "SELECT
                 COUNT(*) AS :fieldNumber
               FROM `omeka_items`
               LEFT JOIN `omeka_collections`
               ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
-              WHERE (" . implode(") AND (", $conditions) . ")";
+              " . $extraSql;
+
         $binds[] = array(":fieldNumber", self::FIELD_NUMBER);
         return array(
             $sql,
@@ -102,6 +120,16 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
     protected function getIdentifiersListSql($cursor, $stepSize, $metadataPrefix, $set, $from, $until)
     {
         list ($binds, $conditions) = $this->createItemsConditions($set, $from, $until);
+
+        $extraSql = "
+            JOIN `omeka_element_texts` AS `isebel_type`
+            ON `isebel_type`.`record_type` = 'Item' AND `isebel_type`.`record_id` = `omeka_items`.`id` AND `isebel_type`.`element_id` = 58
+            WHERE (" . implode(") AND (", $conditions) . ")
+            AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')
+            AND `isebel_type`.`text` = 'sage'
+            AND `omeka_items`.`item_type_id` = 18
+        ";
+
         $sql = "SELECT
                 `omeka_items`.`id` AS `" . self::PREFIX_HEADER . "identifier`,
                 UNIX_TIMESTAMP(`omeka_items`.`modified`) AS `" . self::PREFIX_HEADER . "datestamp`,
@@ -109,10 +137,11 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
               FROM `omeka_items`
               LEFT JOIN `omeka_collections`
               ON `omeka_items`.`collection_id` = `omeka_collections`.`id`
-              WHERE (" . implode(") AND (", $conditions) . ")
+              " . $extraSql . "
               ORDER BY `omeka_items`.`id`
               LIMIT " . intval($cursor) . "," . intval($stepSize) . "
               ";
+
         return array(
             $sql,
             $binds
@@ -239,11 +268,11 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 LEFT JOIN `omeka_element_texts` AS `isebel_taletypes` 
                 ON `isebel_taletypes`.`record_type` = 'Item' AND `isebel_taletypes`.`record_id` = `omeka_items`.`id` AND `isebel_taletypes`.`element_id` = 49  
                 LEFT JOIN `omeka_element_texts` AS `isebel_taletype_title`
-                ON `isebel_taletype_title`.`record_type` = 'Item' AND `isebel_taletype_title`.`element_id` = 43 AND `isebel_taletype_title`.`text`= `isebel_taletypes`.`text` 
+                ON `isebel_taletype_title`.`record_type` = 'Item' AND `isebel_taletype_title`.`element_id` = 43 AND `isebel_taletype_title`.`record_id` = `omeka_items`.`id` AND `isebel_taletype_title`.`text`= `isebel_taletypes`.`text` 
                 LEFT JOIN `omeka_element_texts` AS `isebel_taletype_title_text`
                 ON `isebel_taletype_title_text`.`record_type` = 'Item' AND `isebel_taletype_title_text`.`element_id` = 50 AND `isebel_taletype_title_text`.`record_id`= `isebel_taletype_title`.`record_id` 
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender`
-                ON `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
+                ON `isebel_narrator_gender`.`record_type` = 'Item' AND `isebel_narrator_gender`.`element_id` = 84 AND `isebel_narrator_gender`.`record_id` = `omeka_items`.`id` AND `isebel_narrator_gender`.`text` = `isebel_narrator`.`text`
                 LEFT JOIN `omeka_element_texts` AS `isebel_narrator_gender_text`
                 ON `isebel_narrator_gender_text`.`record_type` = 'Item' AND `isebel_narrator_gender_text`.`element_id` = 84 AND `isebel_narrator_gender_text`.`record_id` = `isebel_narrator_gender`.`record_id`
                 LEFT JOIN `omeka_files` AS `isebel_files`
@@ -251,6 +280,7 @@ class Verhalenbank extends \OAIPMH\DataProviderMysql
                 WHERE (" . implode(") AND (", $conditions) . ") 
                 AND `omeka_items`.`id` not in (SELECT record_id FROM `omeka_element_texts` where element_id='47' and text like 'nee%' and record_type='Item')       
                 AND `isebel_type`.`text` = 'sage'     
+                AND `omeka_items`.`item_type_id` = 18
                 AND `omeka_items`.`id` > " . intval($currentId) . "
                 GROUP BY `omeka_items`.`id`    
                 ORDER BY `omeka_items`.`id`
